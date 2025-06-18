@@ -32,6 +32,12 @@ def signup():
     error_message = ''
     if 'save' in request.args:
             username = request.args.get('username', '').strip()
+            manager = request.args.get('manager', '')
+            if manager == 'true':
+                manager = 1
+            else:
+                manager = 0
+            
             try:
                 conn = sqlite3.connect("csv.db")
                 c = conn.cursor()
@@ -42,7 +48,7 @@ def signup():
                     error_message = 'This Name is Already in Use'
                     return render_template('sign_up_username.html', error_message=error_message)
             except IndexError:
-                return redirect(f'/signup/username={username}')
+                return redirect(f'/signup/username={username}/type={manager}')
         
         
     return render_template('sign_up_username.html', error_message=error_message)
@@ -50,8 +56,8 @@ def signup():
 
     
 
-@app.route("/signup/username=<username>", methods=["GET"])
-def signup_2(username):
+@app.route("/signup/username=<username>/type=<manager>", methods=["GET"])
+def signup_2(username, manager):
     error_message = ''
     if 'save' in request.args:
         password = request.args.get('password', '').strip()
@@ -67,12 +73,12 @@ def signup_2(username):
         except IndexError:
             conn = sqlite3.connect(f'csv.db')
             c = conn.cursor()
-            c.execute("INSERT INTO acc_info (username, password, manager) VALUES (?, ?, ?)", (username, password, 1))
+            c.execute("INSERT INTO acc_info (username, password, manager) VALUES (?, ?, ?)", (username, password, manager))
             conn.commit()
             c.close()
             return redirect('/')
     else:
-        return render_template('sign_up_password.html', error_message=error_message, username=username)
+        return render_template('sign_up_password.html', error_message=error_message, username=username, manager=manager)
 
 
 if __name__ == "__main__":
