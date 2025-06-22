@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect
+
 import sqlite3
 
 app = Flask(__name__)
@@ -79,6 +80,10 @@ def signup_2(username, manager):
             return redirect('/')
     else:
         return render_template('sign_up_password.html', error_message=error_message, username=username, manager=manager)
+
+@app.route("/data-input", methods=["POST"])
+def data_input():
+    return render_template('data_input.html')
 
 
 if __name__ == "__main__":
