@@ -81,8 +81,11 @@ def signup_2(username, manager):
     else:
         return render_template('sign_up_password.html', error_message=error_message, username=username, manager=manager)
 
-@app.route("/data-input", methods=["POST"])
+@app.route("/data-input", methods=["GET"])
 def data_input():
+    if 'submit' in request.args:
+        data = request.args.get('file', '')
+        print(data)
     return render_template('data_input.html')
 
 
