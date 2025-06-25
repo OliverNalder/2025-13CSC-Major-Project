@@ -1,10 +1,19 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 from werkzeug.utils import secure_filename
 import sqlite3
 from fileinput import filename
 import os
+import csv
+
+
+UPLOAD_FOLDER = 'temporary files'
+ALLOWED_EXTENSIONS = {'csv'}
 
 app = Flask(__name__)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+app.secret_key = 'This is your secret key to utilize session in Flask'
 
 @app.route("/")
 def main():
@@ -91,12 +100,21 @@ def data_input():
 
         
         data_filename = secure_filename(f.filename)
+        print(data_filename)
 
         f.save(os.path.join(app.config['UPLOAD_FOLDER'], data_filename))
 
         session['uploaded_data_file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], data_filename)
 
-        return render_template('index2.html')
+        with open(f'temporary files/{data_filename}', mode='r') as infile:
+            reader = csv.reader(infile)
+            with open(data_filename, mode='w') as outfile:
+                writer = csv.writer(outfile)
+                
+                mydict = {rows[0]:rows[1] for rows in reader}
+                print(mydict)
+
+        
     return render_template('data_input.html')
 
 
