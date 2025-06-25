@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect
-
+from werkzeug.utils import secure_filename
 import sqlite3
+from fileinput import filename
+import os
 
 app = Flask(__name__)
 
@@ -81,11 +83,20 @@ def signup_2(username, manager):
     else:
         return render_template('sign_up_password.html', error_message=error_message, username=username, manager=manager)
 
-@app.route("/data-input", methods=["GET"])
+@app.route("/data-input", methods=["GET", "POST"])
 def data_input():
-    if 'submit' in request.args:
-        data = request.args.get('file', '')
-        print(data)
+    if request.method == 'POST':
+      
+        f = request.files.get('file')
+
+        
+        data_filename = secure_filename(f.filename)
+
+        f.save(os.path.join(app.config['UPLOAD_FOLDER'], data_filename))
+
+        session['uploaded_data_file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], data_filename)
+
+        return render_template('index2.html')
     return render_template('data_input.html')
 
 
