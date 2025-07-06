@@ -111,6 +111,17 @@ def data_input():
             with open(data_filename, mode='w') as outfile:
                 writer = csv.writer(outfile)
                 
+                rowLengthChecker = True
+                r = 0
+                rowLength = 0
+                while rowLengthChecker:
+                    if reader[r + 1] != '' and reader[r] == '':
+                        rowLengthChecker = False
+                    else:
+                        rowLength += 1
+                    r += 1
+                    print(rowLength)
+                    
                 mydict = {rows[0]:rows[1] for rows in reader}
                 print(mydict)
 
