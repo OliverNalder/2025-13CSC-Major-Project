@@ -95,38 +95,73 @@ def signup_2(username, manager):
 @app.route("/data-input", methods=["GET", "POST"])
 def data_input():
     if request.method == 'POST':
-      
         f = request.files.get('file')
 
-        
         data_filename = secure_filename(f.filename)
-        print(data_filename)
-
         f.save(os.path.join(app.config['UPLOAD_FOLDER'], data_filename))
-
         session['uploaded_data_file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], data_filename)
 
-        with open(f'temporary files/{data_filename}', mode='r') as infile:
-            reader = csv.reader(infile)
-            with open(data_filename, mode='w') as outfile:
-                writer = csv.writer(outfile)
-                
-                rowLengthChecker = True
-                r = 0
-                rowLength = 0
-                while rowLengthChecker:
-                    if reader[r + 1] != '' and reader[r] == '':
-                        rowLengthChecker = False
-                    else:
-                        rowLength += 1
-                    r += 1
-                    print(rowLength)
-                    
-                mydict = {rows[0]:rows[1] for rows in reader}
-                print(mydict)
+ 
+        data_list = []
+        with open(f'temporary files/{data_filename}', 'r', newline='') as csvfile:
+            csv_reader = csv.reader(csvfile)
+            for row in csv_reader:
+                data_list.append(row)
 
-        
+        conn = sqlite3.connect("csv.db")
+
+    
+        c = conn.cursor()
+        c.execute("SELECT members FROM team_1")
+        checker = c.fetchall()
+        c.close()
+
+        members_list = [r[0] for r in checker]
+
+        dates = []
+        for rows in data_list:
+            if rows[0] == 'members':
+                dates = rows[1:] 
+            elif rows[0] not in members_list and rows[0] != '':
+                c = conn.cursor()
+                c.execute("INSERT INTO team_1 (members) VALUES (?)", (rows[0],))
+                conn.commit()
+                c.close()
+
+        for rows in data_list:
+            if rows[0] == 'members' or rows[0] == '':
+                continue
+
+            member_name = rows[0]
+
+            for num in range(len(dates)):
+                column = dates[num]
+                value = rows[num + 1]
+
+                
+
+                c = conn.cursor()
+                query = f'UPDATE team_1 SET "{column}" = ? WHERE members = ?'
+                c.execute(query, (value, member_name))
+                conn.commit()
+                c.close()
+
+        conn.close()
+        os.remove(f"temporary files/{data_filename}")
+
     return render_template('data_input.html')
+
+@app.route("/team_manager")
+def team_manager():
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute("SELECT team_name FROM _teams")
+    teams = c.fetchall()
+    c.close()
+    print(teams)
+
+    return render_template("team_manager.html", teams=teams)
+
 
 
 if __name__ == "__main__":
