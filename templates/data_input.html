@@ -17,32 +17,30 @@
       <table border="1">
         <thead>
           <tr>
-            <th>Member</th>
-            <th>1_25_Tar</th>
-            <th>1_25_Act</th>
-            <th>2_25_Tar</th>
-            <th>2_25_Act</th>
+            {% for title in column_names %}
+              <th>{{title}}</th>
+            {% endfor %}
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td><input name="members[]" value="member1"></td>
-            <td><input name="1_25_Tar[]" value="10"></td>
-            <td><input name="1_25_Act[]" value="11"></td>
-            <td><input name="2_25_Tar[]" value="12"></td>
-            <td><input name="2_25_Act[]" value="13"></td>
-          </tr>
-          <tr>
-            <td><input name="members[]" value="member2"></td>
-            <td><input name="1_25_Tar[]" value="16"></td>
-            <td><input name="1_25_Act[]" value="17"></td>
-            <td><input name="2_25_Tar[]" value="18"></td>
-            <td><input name="2_25_Act[]" value="19"></td>
-          </tr>
+          {% for stats_row in stats %}
+            <tr>
+              {% for stat in stats_row %}
+                {% if stat == stats_row[0] %}
+                  <td>{{ stat }}</td>
+                {% else: %}
+                  <td><input name="stats" value="{{ stat }}"></td>
+                {% endif %}
+              {% endfor %}
+            </tr>
+          {% endfor %}
         </tbody>
       </table>
+      <button type="button" onclick="addRow()">Add Row</button>
       <button type="submit">Save Data</button>
     </form>
+
+
 
 </body>
 </html>

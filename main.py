@@ -107,6 +107,8 @@ def data_input():
             csv_reader = csv.reader(csvfile)
             for row in csv_reader:
                 data_list.append(row)
+            
+        
 
         conn = sqlite3.connect("csv.db")
 
@@ -114,9 +116,13 @@ def data_input():
         c = conn.cursor()
         c.execute("SELECT members FROM team_1")
         checker = c.fetchall()
+        c.execute("SELECT * FROM team_1")
+        date_checker = [i for i in c.description]
+        print(date_checker)
         c.close()
-
         members_list = [r[0] for r in checker]
+
+        
 
         dates = []
         for rows in data_list:
@@ -148,8 +154,40 @@ def data_input():
 
         conn.close()
         os.remove(f"temporary files/{data_filename}")
+        
+        
 
-    return render_template('data_input.html')
+    
+            
+    
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute("SELECT * FROM team_1")
+    stats = c.fetchall()
+    column_names = [name[0] for name in c.description]
+    c.close()
+    column_names[0] = column_names[0].capitalize()
+    
+    
+    
+
+    return render_template('data_input.html', column_names=column_names, stats=stats)
+
+@app.route("/data-input-manual", methods=["GET", "POST"])
+def manual_input():
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute("SELECT members FROM team_1")
+    checker = c.fetchall()
+    c.close()
+    members_list = [r[0] for r in checker]
+    if request.method == 'POST':
+        
+        data_list = session.get('stats')
+        print(data_list)
+    
+    return redirect('/data-input')
+
 
 @app.route("/team_manager", methods=["GET", "POST"])
 def team_manager():
