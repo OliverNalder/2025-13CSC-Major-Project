@@ -8,14 +8,16 @@
 <body>
     <h1>Active teams:</h1>
     <table border="1">
-        <py-script>
-            for team in teams:
+        
+            {% for team in teams: %}
+        
             <tr>
                 <td>{{team[0]}}</td>
-                <td><a href='/team_manager/{{team}}' border='1'><button>Manage</button></a></td>
+                <td><a href='/team_manager/{{team[0]}}' border='1'><button>Manage</button></a></td>
             </tr>
-        </py-script>
+            {% endfor %}
             
     </table>
+    <a href='/team_manager/create' border='1'><button>Create Team</button>
 </body>
 </html>

@@ -151,16 +151,25 @@ def data_input():
 
     return render_template('data_input.html')
 
-@app.route("/team_manager")
+@app.route("/team_manager", methods=["GET", "POST"])
 def team_manager():
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
     c.execute("SELECT team_name FROM _teams")
     teams = c.fetchall()
     c.close()
-    print(teams)
 
     return render_template("team_manager.html", teams=teams)
+
+@app.route("/team_manager/create", methods=["GET", "POST"])
+def create_team():
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute("SELECT username FROM acc_info")
+    user_list = c.fetchall()
+    c.close()
+
+    return render_template("create_team.html", user_list=user_list)
 
 
 
