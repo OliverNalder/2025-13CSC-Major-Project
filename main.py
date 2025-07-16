@@ -107,7 +107,7 @@ def data_input():
             csv_reader = csv.reader(csvfile)
             for row in csv_reader:
                 data_list.append(row)
-            
+        print(data_list)
         
 
         conn = sqlite3.connect("csv.db")
@@ -118,11 +118,10 @@ def data_input():
         checker = c.fetchall()
         c.execute("SELECT * FROM team_1")
         date_checker = [i for i in c.description]
-        print(date_checker)
         c.close()
         members_list = [r[0] for r in checker]
 
-        
+        print(data_list)
 
         dates = []
         for rows in data_list:
@@ -179,12 +178,42 @@ def manual_input():
     c = conn.cursor()
     c.execute("SELECT members FROM team_1")
     checker = c.fetchall()
+    c.execute("SELECT * FROM team_1")
+    date_checker = [i for i in c.description]
     c.close()
     members_list = [r[0] for r in checker]
     if request.method == 'POST':
         
-        data_list = session.get('stats')
-        print(data_list)
+        stats_list = request.form.getlist('stats')
+        num_cols = int(len(stats_list)/len(members_list))
+        rows_of_values = [stats_list[i:i+num_cols] for i in range(0, len(stats_list), num_cols)]
+        data_list = [[member] + row for member, row in zip(members_list, rows_of_values)]
+        
+
+        dates = []
+        for rows in date_checker:
+            if rows[0] != 'members':
+                dates.append(rows[0])
+        print(dates)
+
+        for rows in data_list:
+            if rows[0] == 'members' or rows[0] == '':
+                continue
+
+            member_name = rows[0]
+
+            for num in range(len(dates)):
+                column = dates[num]
+                value = rows[num + 1]
+
+                
+
+                c = conn.cursor()
+                query = f'UPDATE team_1 SET "{column}" = ? WHERE members = ?'
+                c.execute(query, (value, member_name))
+                conn.commit()
+                c.close()
+
     
     return redirect('/data-input')
 
