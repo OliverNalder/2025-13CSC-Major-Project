@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, make_response
 from werkzeug.utils import secure_filename
 import sqlite3
 from fileinput import filename
 import os
 import csv
+import datetime
 
 
 UPLOAD_FOLDER = 'temporary files'
@@ -28,17 +29,37 @@ def signin():
         try:
             conn = sqlite3.connect("csv.db")
             c = conn.cursor()
-            c.execute(f"SELECT acc_id FROM acc_info WHERE username = '{username}'")
+            c.execute(f"SELECT username FROM acc_info WHERE username = '{username}'")
             checker = c.fetchall()
-            c.close()
             print(checker)
-        except sqlite3.OperationalError:
+            c.close()
+            return redirect(f"/signin/username={checker}")
+        except IndexError:
             error_message = 'Couldn\'t find your account, Please try again'
         
-
+            print(error_message)
 
     return render_template('sign_in_username.html', error_message=error_message)
 
+@app.route("/signin/username=<username>", methods=["GET", "POST"])
+def signin_2(username):
+    
+    if request.method == 'POST':
+        password = request.args.get('password', '').strip()
+        try:
+            conn = sqlite3.connect("csv.db")
+            c = conn.cursor()
+            c.execute(f"SELECT username FROM acc_info WHERE username LIKE '{username}' AND password LIKE '{password}'")
+            checker = c.fetchall()
+            c.close()
+            logged_in_user = make_response(redirect("/"))
+            logged_in_user.set_cookie("username", checker, max_age=3600)
+            return redirect('/')
+        except IndexError:
+            error_message = 'Incorrect Username or Password'
+            return redirect('/signin', error_message=error_message)
+    return render_template('sign_in_password.html')
+        
 @app.route("/signup", methods=["GET"])
 def signup():
     error_message = ''
@@ -235,7 +256,29 @@ def create_team():
     c.execute("SELECT username FROM acc_info")
     user_list = c.fetchall()
     c.close()
+    if request.method == 'POST':
+        team_name = request.form['team_name'].replace(" ", "_")
+        members = request.form.getlist('members')
+        print(team_name)
+        print(members)
+        conn = sqlite3.connect("csv.db")
+        c = conn.cursor()
+        c.execute("INSERT INTO _teams (team_name) VALUES (?)", (team_name,))
+        c.execute(f"CREATE TABLE {team_name} (members)")
 
+        for member in members:
+            c.execute(f"INSERT INTO '{team_name}' (members) VALUES (?)", (member,))
+        
+        current_year = str(datetime.datetime.now().year)[2:]
+        for i in range(1, 13):
+            c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Tar' INTEGER")
+            c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Act' INTEGER")
+            
+        conn.commit()
+        c.close()
+
+        
+        
     return render_template("create_team.html", user_list=user_list)
 
 

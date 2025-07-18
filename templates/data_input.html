@@ -36,23 +36,9 @@
           {% endfor %}
         </tbody>
       </table>
-      <button type="button" onclick="addRow()">Add Member</button>
       <button type="submit">Save Data</button>
     </form>
-<script>
-    function addRow() {
-      const tableBody = document.querySelector("tbody");
-      const row = document.createElement("tr");
 
-      let html = '<td>{{ stat }}</td>';
-      {% for title in column_names %}
-        html += '<td><input name="stats" type="number"></td>';
-      {% endfor %}
-
-      row.innerHTML = html;
-      tableBody.appendChild(row);
-    }
-  </script>
 
 
 </body>
