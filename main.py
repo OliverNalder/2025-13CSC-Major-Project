@@ -18,6 +18,8 @@ app.secret_key = 'This is your secret key to utilize session in Flask'
 
 @app.route("/")
 def main():
+    username = request.cookies.get("username", "Guest")
+    print(username)
     return render_template('myReports.html')
 
 
@@ -33,7 +35,7 @@ def signin():
             checker = c.fetchall()
             print(checker)
             c.close()
-            return redirect(f"/signin/username={checker}")
+            return redirect(f"/signin/username={checker[0][0]}")
         except IndexError:
             error_message = 'Couldn\'t find your account, Please try again'
         
@@ -44,8 +46,10 @@ def signin():
 @app.route("/signin/username=<username>", methods=["GET", "POST"])
 def signin_2(username):
     
-    if request.method == 'POST':
-        password = request.args.get('password', '').strip()
+    if 'save' in request.args:
+        password = request.args.get('password', '')
+        print(username)
+        print(password)
         try:
             conn = sqlite3.connect("csv.db")
             c = conn.cursor()
@@ -53,12 +57,12 @@ def signin_2(username):
             checker = c.fetchall()
             c.close()
             logged_in_user = make_response(redirect("/"))
-            logged_in_user.set_cookie("username", checker, max_age=3600)
-            return redirect('/')
+            logged_in_user.set_cookie("username", checker[0][0], max_age=3600)
+            return logged_in_user
         except IndexError:
             error_message = 'Incorrect Username or Password'
             return redirect('/signin', error_message=error_message)
-    return render_template('sign_in_password.html')
+    return render_template('sign_in_password.html', username=username)
         
 @app.route("/signup", methods=["GET"])
 def signup():
@@ -251,6 +255,7 @@ def team_manager():
 
 @app.route("/team_manager/create", methods=["GET", "POST"])
 def create_team():
+    error_message = ''
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
     c.execute("SELECT username FROM acc_info")
@@ -263,23 +268,28 @@ def create_team():
         print(members)
         conn = sqlite3.connect("csv.db")
         c = conn.cursor()
-        c.execute("INSERT INTO _teams (team_name) VALUES (?)", (team_name,))
-        c.execute(f"CREATE TABLE {team_name} (members)")
+        try:
+            c.execute("INSERT INTO _teams (team_name) VALUES (?)", (team_name,))
+            c.execute(f"CREATE TABLE {team_name} (members)")
 
-        for member in members:
-            c.execute(f"INSERT INTO '{team_name}' (members) VALUES (?)", (member,))
-        
-        current_year = str(datetime.datetime.now().year)[2:]
-        for i in range(1, 13):
-            c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Tar' INTEGER")
-            c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Act' INTEGER")
+            for member in members:
+                c.execute(f"INSERT INTO '{team_name}' (members) VALUES (?)", (member,))
+
+            current_year = str(datetime.datetime.now().year)[2:]
+            for i in range(1, 13):
+                c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Tar' INTEGER")
+                c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Act' INTEGER")
+
+            conn.commit()
+            c.close()
+            return redirect("/team_manager")
+        except sqlite3.OperationalError:
+            error_message = 'This team name is taken'
+            return render_template("create_team.html", user_list=user_list, error_message=error_message)
             
-        conn.commit()
-        c.close()
-
+    members = []
         
-        
-    return render_template("create_team.html", user_list=user_list)
+    return render_template("create_team.html", user_list=user_list, error_message=error_message, members=members)
 
 
 
