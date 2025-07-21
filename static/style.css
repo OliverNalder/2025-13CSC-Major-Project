@@ -14,3 +14,86 @@ input {
     width: 100%;
     box-sizing: border-box;
 }
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background-color: (#c1e5f5);
+}
+
+.top-bar {
+    display: flex;
+    align-items: center;
+    background-color: #c1e5f5ff;
+    color: white;
+    padding: 10px;
+}
+
+.hamburger {
+    font-size: 24px;
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+.logo {
+    height: 40px;
+}
+
+.container {
+    display: flex;
+    flex: 1;
+}
+
+#sidebar {
+    width: 250px;
+    background-color: #d7e9f1;
+    color: black;
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+    margin-left: 5%;
+    margin-bottom: 7%;
+    border-color: #3e7cb1;
+}
+
+#sidebar ul {
+    list-style-type: none;
+}
+
+#sidebar ul li a {
+    display: block;
+    padding: 12px 16px;
+    color: white;
+    text-decoration: none;
+}
+
+#sidebar ul li a:hover {
+    background-color: #c1e5f5ff;
+}
+
+#sidebar .submenu {
+    display: none;
+    background-color: #c1e5f5ff;
+}
+
+#sidebar .submenu.open {
+    display: block;
+}
+
+#sidebar.open {
+    transform: translateX(0);
+}
+
+main#content {
+    flex: 1;
+    padding: 20px;
+    background: #f4f4f4;
+    overflow-y: auto;
+}
