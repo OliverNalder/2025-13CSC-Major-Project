@@ -18,8 +18,11 @@ app.secret_key = 'This is your secret key to utilize session in Flask'
 
 @app.route("/")
 def main():
-    username = request.cookies.get("username", "Guest")
+    username = request.cookies.get("username", 0)
     print(username)
+    if username == 0:
+        return render_template('not_signed_in.html')
+        
     return render_template('myReports.html')
 
 
@@ -33,13 +36,13 @@ def signin():
             c = conn.cursor()
             c.execute(f"SELECT username FROM acc_info WHERE username = '{username}'")
             checker = c.fetchall()
-            print(checker)
+            
             c.close()
             return redirect(f"/signin/username={checker[0][0]}")
         except IndexError:
             error_message = 'Couldn\'t find your account, Please try again'
         
-            print(error_message)
+            
 
     return render_template('sign_in_username.html', error_message=error_message)
 
@@ -48,8 +51,7 @@ def signin_2(username):
     
     if 'save' in request.args:
         password = request.args.get('password', '')
-        print(username)
-        print(password)
+        
         try:
             conn = sqlite3.connect("csv.db")
             c = conn.cursor()
@@ -132,7 +134,7 @@ def data_input():
             csv_reader = csv.reader(csvfile)
             for row in csv_reader:
                 data_list.append(row)
-        print(data_list)
+        
         
 
         conn = sqlite3.connect("csv.db")
@@ -146,7 +148,7 @@ def data_input():
         c.close()
         members_list = [r[0] for r in checker]
 
-        print(data_list)
+        
 
         dates = []
         for rows in data_list:
@@ -219,7 +221,7 @@ def manual_input():
         for rows in date_checker:
             if rows[0] != 'members':
                 dates.append(rows[0])
-        print(dates)
+        
 
         for rows in data_list:
             if rows[0] == 'members' or rows[0] == '':
@@ -264,8 +266,7 @@ def create_team():
     if request.method == 'POST':
         team_name = request.form['team_name'].replace(" ", "_")
         members = request.form.getlist('members')
-        print(team_name)
-        print(members)
+        
         conn = sqlite3.connect("csv.db")
         c = conn.cursor()
         try:
@@ -313,23 +314,28 @@ def edit_team(team_name):
 
         for new in updated_members:
             if new not in current_members:
-                print(new)
+                
                 c.execute(f"INSERT INTO '{team_name}' (members) VALUES '?'", (new,))
 
         for old in current_members:
             if old not in updated_members:
-                print(old)
+                
                 c.execute(f"DELETE FROM '{team_name}' WHERE (members) VALUES '?'", (old,))
 
         conn.commit()
         c.close()
 
-        print(current_members)
-        print(updated_members)
+        
         return redirect('/team_manager')
 
     return render_template("edit_team.html", team_name=team_name, all_users=all_users, current_members=current_members)
     
+
+@app.route('/signout')
+def signout():
+    response = make_response(redirect('/'))
+    response.set_cookie('username', '', max_age=0)
+    return response
 
 if __name__ == "__main__":
     app.run(debug=True)

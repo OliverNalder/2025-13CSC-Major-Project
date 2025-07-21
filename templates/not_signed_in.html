@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Access Denied</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+      h1 {
+        text-align: center;
+        font-size: 50px;
+      }
+      #content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+      }
+    </style>
 </head>
-<style>
-    
-    
-</style>
 <body>
-
-
     <div class="nav_menu">
 
     </div>
@@ -28,26 +34,19 @@
     <div class="container">
         <nav id="sidebar">
             <ul>
-                <li><a href="/">Home</a></li>
-                <li class="dropdown">
-                    <a href="#" onclick="toggleDropdown(this)">Section 1</a>
-                    <ul class="submenu">
-                        <li><a href="/page1">Page 1</a></li>
-                        <li><a href="/page2">Page 2</a></li>
-                    </ul>
-                </li>
-                <li class="dropdown">
-                    <a href="#" onclick="toggleDropdown(this)">Section 2</a>
-                    <ul class="submenu">
-                        <li><a href="/page3">Page 3</a></li>
-                        <li><a href="/page4">Page 4</a></li>
-                    </ul>
-                </li>
-                <li><a href="/signout">Sign Out</a></li>
+                <li><a href="/signin">Sign In</a></li>
+                <li><a href="/signup">Sign Up</a></li>
             </ul>
         </nav>
 
-    <script>
+  <main id="content">
+    <h1>
+        ACCESS DENIED<br>
+        PLEASE SIGN IN
+    </h1>
+  </main>
+
+<script>
         function toggleSidebar() {
             document.getElementById("sidebar").classList.toggle("open");
         }
@@ -55,6 +54,6 @@
         function toggleDropdown(el) {
             el.nextElementSibling.classList.toggle("open");
         }
-    </script>
+</script>
 </body>
 </html>

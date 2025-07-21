@@ -1,19 +1,13 @@
 body {
-    background-color: (#c1e5f5);
+    background-color: #c1e5f5;
 }
 
-table {
-    border-collapse: collapse;
-    width: 100%;
-}
+
 td, th {
     border: 1px solid #ccc;
     padding: 8px;
 }
-input {
-    width: 100%;
-    box-sizing: border-box;
-}
+
 
 * {
     box-sizing: border-box;
@@ -33,18 +27,21 @@ body {
     display: flex;
     align-items: center;
     background-color: #c1e5f5ff;
-    color: white;
+    color: black;
     padding: 10px;
 }
 
 .hamburger {
-    font-size: 24px;
+    font-size: 30px;
     cursor: pointer;
     margin-right: 20px;
+    margin-left: 3.5%;
+    margin-top: 1%;
 }
 
 .logo {
-    height: 40px;
+    height: 70px;
+    margin-top: 1%;
 }
 
 .container {
@@ -55,11 +52,16 @@ body {
 #sidebar {
     width: 250px;
     background-color: #d7e9f1;
-    color: black;
+    color: white;
     transition: transform 0.3s ease;
     overflow-y: auto;
+    margin-top: 3%;
     margin-left: 5%;
     margin-bottom: 7%;
+    border-left: 3px solid;
+    border-right: 3px solid;
+    border-top: 3px solid;
+    border-bottom: 3px solid;
     border-color: #3e7cb1;
 }
 
@@ -70,7 +72,7 @@ body {
 #sidebar ul li a {
     display: block;
     padding: 12px 16px;
-    color: white;
+    color: black;
     text-decoration: none;
 }
 
@@ -80,7 +82,7 @@ body {
 
 #sidebar .submenu {
     display: none;
-    background-color: #c1e5f5ff;
+    background-color: #d7e9f1;
 }
 
 #sidebar .submenu.open {
@@ -94,6 +96,42 @@ body {
 main#content {
     flex: 1;
     padding: 20px;
-    background: #f4f4f4;
+    background: #ffffff;
     overflow-y: auto;
+    margin-right: 8%;
+    margin-left: 5%;
+    margin-top: -3.2%;
+    margin-bottom: 3%;
+}
+
+.input_table {
+    
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.input_table td, .input_table th {
+    border-color: #595959;
+}
+
+.input_table::-webkit-scrollbar {
+    height: 20px;
+}
+
+.input_table::-webkit-scrollbar-track {
+    background: #ffffff;
+    border-left: 1px solid #595959;
+    border-right: 1px solid #595959;
+    border-bottom: 1px solid #595959;
+}
+
+.input_table::-webkit-scrollbar-thumb {
+    background-color: #ccccccff;
+    border-left: 1px solid #595959;
+    border-right: 1px solid #595959;
+    border-bottom: 1px solid #595959;
+}
+
+.input_table::-webkit-scrollbar-thumb:hover {
+    background-color: #5c5c5c;
 }
