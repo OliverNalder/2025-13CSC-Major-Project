@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, make_response
+from flask import Flask, render_template, request, redirect, session, make_response, url_for
 from werkzeug.utils import secure_filename
 import sqlite3
 from fileinput import filename
@@ -139,9 +139,9 @@ def data_input():
 
     
         c = conn.cursor()
-        c.execute("SELECT members FROM team_1")
+        c.execute("SELECT members FROM Green_Team")
         checker = c.fetchall()
-        c.execute("SELECT * FROM team_1")
+        c.execute("SELECT * FROM Green_Team")
         date_checker = [i for i in c.description]
         c.close()
         members_list = [r[0] for r in checker]
@@ -154,7 +154,7 @@ def data_input():
                 dates = rows[1:] 
             elif rows[0] not in members_list and rows[0] != '':
                 c = conn.cursor()
-                c.execute("INSERT INTO team_1 (members) VALUES (?)", (rows[0],))
+                c.execute("INSERT INTO Green_Team (members) VALUES (?)", (rows[0],))
                 conn.commit()
                 c.close()
 
@@ -171,7 +171,7 @@ def data_input():
                 
 
                 c = conn.cursor()
-                query = f'UPDATE team_1 SET "{column}" = ? WHERE members = ?'
+                query = f'UPDATE Green_Team SET "{column}" = ? WHERE members = ?'
                 c.execute(query, (value, member_name))
                 conn.commit()
                 c.close()
@@ -186,7 +186,7 @@ def data_input():
     
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
-    c.execute("SELECT * FROM team_1")
+    c.execute("SELECT * FROM Green_Team")
     stats = c.fetchall()
     column_names = [name[0] for name in c.description]
     c.close()
@@ -201,9 +201,9 @@ def data_input():
 def manual_input():
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
-    c.execute("SELECT members FROM team_1")
+    c.execute("SELECT members FROM Green_Team")
     checker = c.fetchall()
-    c.execute("SELECT * FROM team_1")
+    c.execute("SELECT * FROM Green_Team")
     date_checker = [i for i in c.description]
     c.close()
     members_list = [r[0] for r in checker]
@@ -234,7 +234,7 @@ def manual_input():
                 
 
                 c = conn.cursor()
-                query = f'UPDATE team_1 SET "{column}" = ? WHERE members = ?'
+                query = f'UPDATE Green_Team SET "{column}" = ? WHERE members = ?'
                 c.execute(query, (value, member_name))
                 conn.commit()
                 c.close()
@@ -287,11 +287,49 @@ def create_team():
             error_message = 'This team name is taken'
             return render_template("create_team.html", user_list=user_list, error_message=error_message)
             
-    members = []
+    
         
-    return render_template("create_team.html", user_list=user_list, error_message=error_message, members=members)
+    return render_template("create_team.html", user_list=user_list, error_message=error_message)
 
+@app.route("/team_manager/edit/<team_name>", methods=["GET", "POST"])
+def edit_team(team_name):
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
 
+    c.execute("SELECT username FROM acc_info")
+    all_users = [row[0] for row in c.fetchall()]
+
+    
+    c.execute(f"SELECT members FROM '{team_name}'")
+    current_members = [row[0] for row in c.fetchall()]
+
+    conn.close()
+
+    if request.method == 'POST':
+        updated_members = request.form.getlist("members")
+
+        conn = sqlite3.connect("csv.db")
+        c = conn.cursor()
+
+        for new in updated_members:
+            if new not in current_members:
+                print(new)
+                c.execute(f"INSERT INTO '{team_name}' (members) VALUES '?'", (new,))
+
+        for old in current_members:
+            if old not in updated_members:
+                print(old)
+                c.execute(f"DELETE FROM '{team_name}' WHERE (members) VALUES '?'", (old,))
+
+        conn.commit()
+        c.close()
+
+        print(current_members)
+        print(updated_members)
+        return redirect('/team_manager')
+
+    return render_template("edit_team.html", team_name=team_name, all_users=all_users, current_members=current_members)
+    
 
 if __name__ == "__main__":
     app.run(debug=True)

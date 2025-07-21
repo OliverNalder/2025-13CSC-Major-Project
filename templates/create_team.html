@@ -1,128 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Team</title>
+
   <style>
-.dropbtn {
-  padding: 16px;
-  font-size: 16px;
-  border: none;
-  cursor: pointer;
-}
+    .dropbtn {
+      padding: 16px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+    }
 
+    #myInput {
+      box-sizing: border-box;
+      font-size: 16px;
+      padding: 14px 20px 12px 45px;
+      border: none;
+      border-bottom: 1px solid #ddd;
+    }
 
+    #myInput:focus { outline: 3px solid #ddd; }
 
-#myInput {
-  box-sizing: border-box;
-  background-image: url('searchicon.png');
-  background-position: 14px 12px;
-  background-repeat: no-repeat;
-  font-size: 16px;
-  padding: 14px 20px 12px 45px;
-  border: none;
-  border-bottom: 1px solid #ddd;
-}
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
 
-#myInput:focus {outline: 3px solid #ddd;}
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f6f6f6;
+      min-width: 230px;
+      overflow: auto;
+      border: 1px solid #ddd;
+      z-index: 1;
+    }
 
-.dropdown {
-  position: relative;
-  display: inline-block;
-}
+    .dropdown-content button {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 12px 16px;
+      text-align: left;
+      cursor: pointer;
+    }
 
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f6f6f6;
-  min-width: 230px;
-  overflow: auto;
-  border: 1px solid #ddd;
-  z-index: 1;
-}
+    .dropdown-content button:hover {
+      background-color: #ddd;
+    }
 
-.dropdown-content a {
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-}
+    .show {
+      display: block;
+    }
 
-.dropdown a:hover {background-color: #ddd;}
-
-.show {display: block;}
-</style>
+    td button {
+      margin-left: 10px;
+      border: none;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
-<form method="POST">
-  <input type="text" name="team_name" placeholder="Team Name" required>
-  <table border="1">
-    <tr><th>Members</th></tr>
-    <tbody>
-    </tbody>
-    <tr>
-      <td>
-        <div class="dropdown">
-          <button onclick="myFunction()" class="dropbtn" type="button">Add Member</button>
-          <div id="myDropdown" class="dropdown-content">
-            <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
-            {% for user in user_list %}
-              <button type="button" onclick="addMember(event)" id="{{ user[0] }}">{{ user[0] }}</button>
-            {% endfor %}
+  <form method="POST" action="/team_manager/create">
+    <input type="text" name="team_name" placeholder="Team Name" required>
+    <table border="1">
+      <tr><th>Members</th></tr>
+      <tbody></tbody>
+      <tr>
+        <td>
+          <div class="dropdown">
+            <button onclick="toggleDropdown()" class="dropbtn" type="button">Add Member</button>
+            <div id="myDropdown" class="dropdown-content">
+              <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+              {% for user in user_list %}
+                <button type="button" onclick="addMember(event)" id="{{ user[0] }}">{{ user[0] }}</button>
+              {% endfor %}
+            </div>
           </div>
-        </div>
-      </td>
-    </tr>
-  </table>
-  <button type="submit">Create Team</button>
-</form>
-<p>{{ error_message }}</p>
-    
+        </td>
+      </tr>
+    </table>
+    <button type="submit">Create Team</button>
+  </form>
+  <p>{{ error_message }}</p>
 
-<script>
-  function addMember(event) {
-      event.preventDefault();
-      const tableBody = document.querySelector("tbody");
-      const row = document.createElement("tr");
-      const memberId = event.target.id;
-
-      let html = `<td>${memberId}</td>`;
-      row.innerHTML = html;
-      tableBody.appendChild(row);
-
-      const hiddenInput = document.createElement("input");
-      hiddenInput.type = "hidden";
-      hiddenInput.name = "members";
-      hiddenInput.value = memberId;
-      document.querySelector("form").appendChild(hiddenInput);
-
-      event.target.remove();
+  <script>
+    function toggleDropdown() {
+      document.getElementById("myDropdown").classList.toggle("show");
     }
 
-
-
-function myFunction() {
-  document.getElementById("myDropdown").classList.toggle("show");
-}
-
-  function filterFunction() {
-    const input = document.getElementById("myInput");
-    const filter = input.value.toUpperCase();
-    const div = document.getElementById("myDropdown");
-    const a = div.getElementsByTagName("a");
-    for (let i = 0; i < a.length; i++) {
-      txtValue = a[i].textContent || a[i].innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        a[i].style.display = "";
-      } else {
-        a[i].style.display = "none";
+    function filterFunction() {
+      const input = document.getElementById("myInput");
+      const filter = input.value.toUpperCase();
+      const div = document.getElementById("myDropdown");
+      const buttons = div.getElementsByTagName("button");
+      for (let i = 0; i < buttons.length; i++) {
+        const txtValue = buttons[i].textContent || buttons[i].innerText;
+        buttons[i].style.display = txtValue.toUpperCase().includes(filter) ? "" : "none";
       }
     }
-  }
 
-</script>
+    function addMember(event) {
+      event.preventDefault();
+      const memberId = event.target.id;
+      const tableBody = document.querySelector("tbody");
+
+     
+      const row = document.createElement("tr");
+      const cell = document.createElement("td");
+      cell.textContent = memberId;
+
+      const removeBtn = document.createElement("button");
+      removeBtn.textContent = "Remove";
+      removeBtn.type = "button";
+      removeBtn.onclick = function () {
+        row.remove();         
+        input.remove();       
+        event.target.style.display = ""; 
+      };
+
+      cell.appendChild(removeBtn);
+      row.appendChild(cell);
+      tableBody.appendChild(row);
+
+      
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "members";
+      input.value = memberId;
+      document.querySelector("form").appendChild(input);
+
+      
+      event.target.style.display = "none";
+    }
+  </script>
 </body>
 </html>

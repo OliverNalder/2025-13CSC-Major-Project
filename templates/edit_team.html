@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form method="POST">
+        <input type="text" name="team_name" value="{{ team_name }}" readonly>
+        <table border="1">
+          <tr><th>Members</th></tr>
+          <tbody>
+              {% for member in current_members %}
+              <tr>
+                  <td>
+                      {{ member }}
+                      <button type="button" onclick="removeExistingMember(this, '{{ member }}')">Remove</button>
+                      <input type="hidden" name="members" value="{{ member }}">
+                  </td>
+              </tr>
+              {% endfor %}
+          </tbody>
+          <tr>
+              <td>
+                  <div class="dropdown">
+                      <button onclick="toggleDropdown()" class="dropbtn" type="button">Add Member</button>
+                      <div id="myDropdown" class="dropdown-content">
+                          <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+                          {% for user in all_users %}
+                              {% if user not in current_members %}
+                                  <button type="button" onclick="addMember(event)" id="{{ user }}">{{ user }}</button>
+                              {% endif %}
+                          {% endfor %}
+                      </div>
+                  </div>
+              </td>
+          </tr>
+        </table>
+        <button type="submit">Save Changes</button>
+    </form>
+
+    <script>
+function toggleDropdown() {
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+function filterFunction() {
+  const input = document.getElementById("myInput");
+  const filter = input.value.toUpperCase();
+  const div = document.getElementById("myDropdown");
+  const buttons = div.getElementsByTagName("button");
+  for (let i = 0; i < buttons.length; i++) {
+    const txtValue = buttons[i].textContent || buttons[i].innerText;
+    buttons[i].style.display = txtValue.toUpperCase().includes(filter) ? "" : "none";
+  }
+}
+
+function addMember(event) {
+  event.preventDefault();
+  const memberId = event.target.id;
+  const tableBody = document.querySelector("tbody");
+
+  
+  const row = document.createElement("tr");
+  const cell = document.createElement("td");
+  cell.textContent = memberId;
+
+  const removeBtn = document.createElement("button");
+  removeBtn.type = "button";
+  removeBtn.textContent = "Remove";
+  removeBtn.onclick = function () {
+    row.remove();
+    input.remove();
+    event.target.style.display = "";
+  };
+
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = "members";
+  input.value = memberId;
+
+  cell.appendChild(removeBtn);
+  row.appendChild(cell);
+  tableBody.appendChild(row);
+  document.querySelector("form").appendChild(input);
+
+ 
+  event.target.style.display = "none";
+}
+
+function removeExistingMember(button, memberId) {
+  const row = button.closest("tr");
+  const inputs = document.getElementsByName("members");
+
+  
+  for (let i = 0; i < inputs.length; i++) {
+    if (inputs[i].value === memberId) {
+      inputs[i].remove();
+      break;
+    }
+  }
+
+  row.remove();
+
+  
+  const dropdownButtons = document.querySelectorAll("#myDropdown button");
+  dropdownButtons.forEach(btn => {
+    if (btn.id === memberId) {
+      btn.style.display = "";
+    }
+  });
+}
+</script>
+</body>
+</html>
