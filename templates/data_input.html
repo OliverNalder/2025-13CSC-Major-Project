@@ -15,7 +15,7 @@
             <div class="hamburger" onclick="toggleSidebar()">
                 &#9776;
             </div>
-            <img src="static/__LogoCMYK NOBLYINE (1).png" alt="Logo" class="logo" />
+            <a href="https://wealthpoint.co.nz/"><img src="static/__LogoCMYK NOBLYINE (1).png" alt="Logo" class="logo" /></a>
         </div>
     </header>
 
@@ -49,7 +49,7 @@
 
     <form method="POST" action="/data-input-manual">
       <div class="input_table">
-      <table border="1">
+      <table border="1" cellspacing="0">
         <thead>
           <tr>
             {% for title in column_names %}
@@ -62,7 +62,7 @@
             <tr>
               {% for stat in stats_row %}
                 {% if stat == stats_row[0] %}
-                  <td>{{ stat }}</td>
+                  <td class="name">{{ stat }}</td>
                 {% else: %}
                   <td><input name="stats" value="{{ stat }}" type="number"></td>
                 {% endif %}

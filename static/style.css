@@ -5,7 +5,8 @@ body {
 
 td, th {
     border: 1px solid #ccc;
-    padding: 8px;
+      
+    
 }
 
 
@@ -36,12 +37,13 @@ body {
     cursor: pointer;
     margin-right: 20px;
     margin-left: 3.5%;
-    margin-top: 1%;
+    margin-top: -0.4%;
 }
 
 .logo {
     height: 70px;
     margin-top: 1%;
+    
 }
 
 .container {
@@ -135,3 +137,15 @@ main#content {
 .input_table::-webkit-scrollbar-thumb:hover {
     background-color: #5c5c5c;
 }
+
+.input_table th, .name {
+    padding: 8px;
+}
+
+.input_table td input {
+    padding: 8px;
+    width: 100%;
+    border: none
+    
+}
+

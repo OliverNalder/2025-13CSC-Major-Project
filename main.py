@@ -19,7 +19,6 @@ app.secret_key = 'This is your secret key to utilize session in Flask'
 @app.route("/")
 def main():
     username = request.cookies.get("username", 0)
-    print(username)
     if username == 0:
         return render_template('not_signed_in.html')
         
@@ -121,6 +120,9 @@ def signup_2(username, manager):
 
 @app.route("/data-input", methods=["GET", "POST"])
 def data_input():
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
     if request.method == 'POST':
         f = request.files.get('file')
 
@@ -201,6 +203,9 @@ def data_input():
 
 @app.route("/data-input-manual", methods=["GET", "POST"])
 def manual_input():
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
     c.execute("SELECT members FROM Green_Team")
@@ -247,6 +252,9 @@ def manual_input():
 
 @app.route("/team_manager", methods=["GET", "POST"])
 def team_manager():
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
     c.execute("SELECT team_name FROM _teams")
@@ -257,6 +265,9 @@ def team_manager():
 
 @app.route("/team_manager/create", methods=["GET", "POST"])
 def create_team():
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
     error_message = ''
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
@@ -294,6 +305,9 @@ def create_team():
 
 @app.route("/team_manager/edit/<team_name>", methods=["GET", "POST"])
 def edit_team(team_name):
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
 
