@@ -26,7 +26,6 @@ def main():
     user_teams = request.cookies.get("teams")
     user_teams = json.loads(user_teams)
 
-    conn = sqlite3.connect('csv.db')
     
         
     return render_template('myReports.html', user_teams=user_teams)
@@ -264,11 +263,9 @@ def team_manager():
     username = request.cookies.get("username", 0)
     if username == 0:
         return render_template('not_signed_in.html')
-    conn = sqlite3.connect("csv.db")
-    c = conn.cursor()
-    c.execute("SELECT team_name FROM _teams")
-    teams = c.fetchall()
-    c.close()
+    
+    teams = request.cookies.get("teams")
+    teams = json.loads(teams)
 
     return render_template("team_manager.html", teams=teams)
 
@@ -317,6 +314,12 @@ def edit_team(team_name):
     username = request.cookies.get("username", 0)
     if username == 0:
         return render_template('not_signed_in.html')
+    
+    teams = request.cookies.get("teams")
+    teams = json.loads(teams)
+    if team_name not in teams:
+        return redirect('/team_manager')
+
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
 
