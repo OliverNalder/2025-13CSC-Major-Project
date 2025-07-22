@@ -5,6 +5,7 @@ from fileinput import filename
 import os
 import csv
 import datetime
+import json
 
 
 UPLOAD_FOLDER = 'temporary files'
@@ -22,7 +23,13 @@ def main():
     if username == 0:
         return render_template('not_signed_in.html')
         
-    return render_template('myReports.html')
+    user_teams = request.cookies.get("teams")
+    user_teams = json.loads(user_teams)
+
+    conn = sqlite3.connect('csv.db')
+    
+        
+    return render_template('myReports.html', user_teams=user_teams)
 
 
 @app.route("/signin", methods=["GET"])
@@ -57,7 +64,7 @@ def signin_2(username):
             c.execute(f"SELECT username FROM acc_info WHERE username LIKE '{username}' AND password LIKE '{password}'")
             checker = c.fetchall()
             c.close()
-            logged_in_user = make_response(redirect("/"))
+            logged_in_user = make_response(redirect("/get_team"))
             logged_in_user.set_cookie("username", checker[0][0], max_age=3600)
             return logged_in_user
         except IndexError:
@@ -114,7 +121,9 @@ def signup_2(username, manager):
             c.execute("INSERT INTO acc_info (username, password, manager) VALUES (?, ?, ?)", (username, password, manager))
             conn.commit()
             c.close()
-            return redirect('/')
+            logged_in_user = make_response(redirect("/get_team"))
+            logged_in_user.set_cookie("username", checker[0][0], max_age=3600)
+            return logged_in_user
     else:
         return render_template('sign_up_password.html', error_message=error_message, username=username, manager=manager)
 
@@ -343,6 +352,32 @@ def edit_team(team_name):
         return redirect('/team_manager')
 
     return render_template("edit_team.html", team_name=team_name, all_users=all_users, current_members=current_members)
+
+@app.route('/get_team')
+def get_team():
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
+    teams = []
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute("SELECT team_name FROM _teams")
+    checker = [a[0] for a in c.fetchall()]
+    for check in checker:
+        c.execute(f"SELECT members FROM {check}")
+        members = [member[0] for member in c.fetchall()]
+        if username in members:
+            teams.append(check)
+    
+    c.close()
+
+    teams = json.dumps(teams)
+    user_teams = make_response(redirect("/"))
+    user_teams.set_cookie("teams", teams, max_age=3600)
+    return user_teams
+    
+
+    
     
 
 @app.route('/signout')
