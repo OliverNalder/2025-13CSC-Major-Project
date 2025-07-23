@@ -65,31 +65,85 @@
 </head>
 
 <body>
-  <form method="POST" action="/team_manager/create">
-    <input type="text" name="team_name" placeholder="Team Name" required>
-    <table border="1">
-      <tr><th>Members</th></tr>
-      <tbody></tbody>
-      <tr>
-        <td>
-          <div class="dropdown">
-            <button onclick="toggleDropdown()" class="dropbtn" type="button">Add Member</button>
-            <div id="myDropdown" class="dropdown-content">
-              <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
-              {% for user in user_list %}
-                <button type="button" onclick="addMember(event)" id="{{ user[0] }}">{{ user[0] }}</button>
-              {% endfor %}
+  <div class="nav_menu">
+
+    </div>
+    <header>
+        <div class="top-bar">
+            <div class="hamburger" onclick="toggleSidebar()">
+                &#9776;
             </div>
-          </div>
-        </td>
-      </tr>
-    </table>
-    <button type="submit">Create Team</button>
-  </form>
-  <p>{{ error_message }}</p>
+            <a href="https://wealthpoint.co.nz/"><img src="static/__LogoCMYK NOBLYINE (1).png" alt="Logo" class="logo" /></a>
+        </div>
+    </header>
+
+    <div class="container">
+        <nav id="sidebar">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/data-input">Data Input</a></li>
+                <li class="dropdown">
+                    <a href="#" onclick="toggleDropdown(this)">Reports</a>
+                    <ul class="submenu">
+                        <li><a href="/report">All Team</a></li>
+                        <li class="dropdown">
+                          <a href="#" onclick="toggleDropdown(this)">Individuals</a>
+                          <ul class="submenu">
+                              {% for member in team_members %}
+                                <li><a href="/report/{{member}}">{{member}}</a></li>
+                              {% endfor %}
+                          </ul>
+                        </li>
+                        
+                        <li><a href="/report_old">Previous Years</a></li>
+                        
+                    </ul>
+                </li>
+                <li><a href="/team_manager">Team Management</a></li>
+                <li><a href="/signout">Sign Out</a></li>
+            </ul>
+        </nav>
+    
+    <main id="content">
+      <form method="POST" action="/team_manager/create">
+          <input type="text" name="team_name" placeholder="Team Name" required>
+          <table border="1">
+            <tr><th>Members</th></tr>
+            <tbody></tbody>
+            <tr>
+              <td>
+                <div class="dropdown">
+                  <button onclick="toggleDropdown()" class="dropbtn" type="button">Add Member</button>
+                  <div id="myDropdown" class="dropdown-content">
+                    <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
+                    {% for user in user_list %}
+                      <button type="button" onclick="addMember(event)" id="{{ user[0] }}">{{ user[0] }}</button>
+                    {% endfor %}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+          <button type="submit">Create Team</button>
+        </form>
+        <p>{{ error_message }}</p>
+    </main>
+
+    <script>
+
+    </script>
+  
 
   <script>
-    function toggleDropdown() {
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("open");
+    }
+
+    function toggleDropdown(el) {
+      el.nextElementSibling.classList.toggle("open");
+     }
+    
+     function toggleDropdown() {
       document.getElementById("myDropdown").classList.toggle("show");
     }
 

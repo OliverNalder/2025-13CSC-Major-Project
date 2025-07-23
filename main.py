@@ -161,7 +161,13 @@ def data_input():
     
     
     team = request.cookies.get('selected_team')
-    print(team)
+    teams = json.loads(request.cookies.get('teams'))
+
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute(f"SELECT members FROM '{team}'")
+    team_members = [t[0] for t in c.fetchall()]
+    c.close()
     if request.method == 'POST':
 
         f = request.files.get('file')
@@ -237,7 +243,7 @@ def data_input():
     
     
 
-    return render_template('data_input.html', column_names=column_names, stats=stats)
+    return render_template('data_input.html', column_names=column_names, stats=stats, team=team, user_teams=teams, team_members=team_members)
 
 @app.route("/data-input-manual", methods=["GET", "POST"])
 def manual_input():
@@ -328,7 +334,7 @@ def create_team():
     if request.method == 'POST':
         team_name = request.form['team_name'].replace(" ", "_")
         members = request.form.getlist('members')
-        
+
         conn = sqlite3.connect("csv.db")
         c = conn.cursor()
         try:
@@ -344,14 +350,29 @@ def create_team():
                 c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Act' INTEGER")
 
             conn.commit()
+            teams = []
+            c.execute("SELECT team_name FROM _teams")
+            checker = [a[0] for a in c.fetchall()]
+            for check in checker:
+                c.execute(f"SELECT members FROM {check}")
+                members = [member[0] for member in c.fetchall()]
+                if username in members:
+                    teams.append(check)
+
+            teams = json.dumps(teams)
+            user_teams = make_response(redirect("/team_manager"))
+            user_teams.set_cookie("teams", teams, max_age=3600)
+            
+
             c.close()
-            return redirect("/team_manager")
+            return user_teams
+
         except sqlite3.OperationalError:
             error_message = 'This team name is taken'
             return render_template("create_team.html", user_list=user_list, error_message=error_message)
-            
-    
-        
+
+
+
     return render_template("create_team.html", user_list=user_list, error_message=error_message)
 
 @app.route("/team_manager/edit/<team_name>", methods=["GET", "POST"])

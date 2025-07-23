@@ -57,7 +57,7 @@ body {
     color: white;
     transition: transform 0.3s ease;
     overflow-y: auto;
-    margin-top: 3%;
+    margin-top: 6%;
     margin-left: 5%;
     margin-bottom: 7%;
     border-left: 3px solid;
@@ -65,6 +65,12 @@ body {
     border-top: 3px solid;
     border-bottom: 3px solid;
     border-color: #3e7cb1;
+    transform: translateX(-200%);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1000;
 }
 
 #sidebar ul {
@@ -87,6 +93,10 @@ body {
     background-color: #d7e9f1;
 }
 
+#sidebar .submenu li {
+    padding-left: 32px;
+}
+
 #sidebar .submenu.open {
     display: block;
 }
@@ -101,7 +111,7 @@ main#content {
     background: #ffffff;
     overflow-y: auto;
     margin-right: 8%;
-    margin-left: 5%;
+    margin-left: 23%;
     margin-top: -2%;
     margin-bottom: 3%;
 }
