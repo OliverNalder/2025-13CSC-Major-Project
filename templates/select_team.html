@@ -42,11 +42,11 @@
         </nav>
         
   <main id="content">
-    <form method="POST">
-        <select name="select">
+    <form method="POST" id="teamForm">
+        <select name="select" id="teamSelect">
             <option selected disabled hidden>Select Team</option>
             {% for team in user_teams %}
-                <option type="submit">{{ team }}</option>
+                <option value="{{ team }}">{{ team }}</option>
             {% endfor %}
         </select>
     </form>
@@ -60,6 +60,9 @@
         function toggleDropdown(el) {
             el.nextElementSibling.classList.toggle("open");
         }
+    document.getElementById("teamSelect").addEventListener("change", function () {
+        document.getElementById("teamForm").submit();
+    });
 </script>
 </body>
 </html>

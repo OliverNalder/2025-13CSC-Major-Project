@@ -17,11 +17,25 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 app.secret_key = 'This is your secret key to utilize session in Flask'
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def main():
     username = request.cookies.get("username", 0)
     if username == 0:
         return render_template('not_signed_in.html')
+    
+    if request.method == 'POST' and request.form.get("select"):
+        team = request.form.get("select")
+
+        resp = make_response(redirect(request.path))
+        resp.set_cookie("selected_team", team)
+        return resp
+
+    selected_team = request.cookies.get("selected_team", 0)
+    if selected_team == 0:
+        
+        user_teams = json.loads(request.cookies.get("teams", "[]"))
+        return render_template('select_team.html', user_teams=user_teams)
+
         
     user_teams = request.cookies.get("teams")
     user_teams = json.loads(user_teams)
@@ -131,15 +145,24 @@ def data_input():
     username = request.cookies.get("username", 0)
     if username == 0:
         return render_template('not_signed_in.html')
+    
+    if request.method == 'POST' and request.form.get("select"):
+        team = request.form.get("select")
+
+        resp = make_response(redirect(request.path))
+        resp.set_cookie("selected_team", team)
+        return resp
+
     selected_team = request.cookies.get("selected_team", 0)
     if selected_team == 0:
-        user_teams = request.cookies.get("teams")
-        user_teams = json.loads(user_teams)
+        
+        user_teams = json.loads(request.cookies.get("teams", "[]"))
         return render_template('select_team.html', user_teams=user_teams)
-
+    
+    
+    team = request.cookies.get('selected_team')
+    print(team)
     if request.method == 'POST':
-        team = request.form.getlist('select')
-        print(team)
 
         f = request.files.get('file')
 
@@ -155,14 +178,12 @@ def data_input():
                 data_list.append(row)
         
         
-
+        
         conn = sqlite3.connect("csv.db")
-
-    
         c = conn.cursor()
-        c.execute("SELECT members FROM Green_Team")
+        c.execute(f"SELECT members FROM '{team}'")
         checker = c.fetchall()
-        c.execute("SELECT * FROM Green_Team")
+        c.execute(f"SELECT * FROM '{team}'")
         date_checker = [i for i in c.description]
         c.close()
         members_list = [r[0] for r in checker]
@@ -175,7 +196,7 @@ def data_input():
                 dates = rows[1:] 
             elif rows[0] not in members_list and rows[0] != '':
                 c = conn.cursor()
-                c.execute("INSERT INTO Green_Team (members) VALUES (?)", (rows[0],))
+                c.execute(f"INSERT INTO '{team}' (members) VALUES (?)", (rows[0],))
                 conn.commit()
                 c.close()
 
@@ -192,7 +213,7 @@ def data_input():
                 
 
                 c = conn.cursor()
-                query = f'UPDATE Green_Team SET "{column}" = ? WHERE members = ?'
+                query = f'UPDATE "{team}" SET "{column}" = ? WHERE members = ?'
                 c.execute(query, (value, member_name))
                 conn.commit()
                 c.close()
@@ -207,7 +228,7 @@ def data_input():
     
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
-    c.execute("SELECT * FROM Green_Team")
+    c.execute(f"SELECT * FROM '{team}'")
     stats = c.fetchall()
     column_names = [name[0] for name in c.description]
     c.close()
@@ -223,11 +244,26 @@ def manual_input():
     username = request.cookies.get("username", 0)
     if username == 0:
         return render_template('not_signed_in.html')
+    
+    if request.method == 'POST' and request.form.get("select"):
+        team = request.form.get("select")
+
+        resp = make_response(redirect(request.path))
+        resp.set_cookie("selected_team", team)
+        return resp
+
+    selected_team = request.cookies.get("selected_team", 0)
+    if selected_team == 0:
+        
+        user_teams = json.loads(request.cookies.get("teams", "[]"))
+        return render_template('select_team.html', user_teams=user_teams)
+
+    team = request.cookies.get('selected_team')
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
-    c.execute("SELECT members FROM Green_Team")
+    c.execute(f"SELECT members FROM '{team}'")
     checker = c.fetchall()
-    c.execute("SELECT * FROM Green_Team")
+    c.execute(f"SELECT * FROM '{team}'")
     date_checker = [i for i in c.description]
     c.close()
     members_list = [r[0] for r in checker]
@@ -258,7 +294,7 @@ def manual_input():
                 
 
                 c = conn.cursor()
-                query = f'UPDATE Green_Team SET "{column}" = ? WHERE members = ?'
+                query = f'UPDATE "{team}" SET "{column}" = ? WHERE members = ?'
                 c.execute(query, (value, member_name))
                 conn.commit()
                 c.close()
@@ -396,6 +432,8 @@ def get_team():
 def signout():
     response = make_response(redirect('/'))
     response.set_cookie('username', '', max_age=0)
+    response.set_cookie('selected_team', '', max_age=0)
+    response.set_cookie('teams', '', max_age=0)
     return response
 
 if __name__ == "__main__":
