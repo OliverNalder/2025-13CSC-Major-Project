@@ -131,7 +131,16 @@ def data_input():
     username = request.cookies.get("username", 0)
     if username == 0:
         return render_template('not_signed_in.html')
+    selected_team = request.cookies.get("selected_team", 0)
+    if selected_team == 0:
+        user_teams = request.cookies.get("teams")
+        user_teams = json.loads(user_teams)
+        return render_template('select_team.html', user_teams=user_teams)
+
     if request.method == 'POST':
+        team = request.form.getlist('select')
+        print(team)
+
         f = request.files.get('file')
 
         data_filename = secure_filename(f.filename)
