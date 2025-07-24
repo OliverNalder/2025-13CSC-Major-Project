@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request, redirect, session, make_response, url_for
+from flask import Flask, render_template, request, redirect, session, make_response, url_for, send_file
 from werkzeug.utils import secure_filename
 import sqlite3
-from fileinput import filename
 import os
 import csv
 import datetime
 import json
+import tempfile
 
 
 UPLOAD_FOLDER = 'temporary files'
@@ -135,7 +135,7 @@ def signup_2(username, manager):
             conn.commit()
             c.close()
             logged_in_user = make_response(redirect("/get_team"))
-            logged_in_user.set_cookie("username", checker[0][0], max_age=3600)
+            logged_in_user.set_cookie("username", username, max_age=3600)
             return logged_in_user
     else:
         return render_template('sign_up_password.html', error_message=error_message, username=username, manager=manager)
@@ -168,6 +168,17 @@ def data_input():
     c.execute(f"SELECT members FROM '{team}'")
     team_members = [t[0] for t in c.fetchall()]
     c.close()
+
+    error_message = ''
+
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute(f"SELECT * FROM '{team}'")
+    stats = c.fetchall()
+    column_names = [name[0] for name in c.description]
+    c.close()
+    column_names[0] = column_names[0].capitalize()
+
     if request.method == 'POST':
 
         f = request.files.get('file')
@@ -190,11 +201,15 @@ def data_input():
         c.execute(f"SELECT members FROM '{team}'")
         checker = c.fetchall()
         c.execute(f"SELECT * FROM '{team}'")
-        date_checker = [i for i in c.description]
+        date_checker = [i[0] for i in c.description]
         c.close()
         members_list = [r[0] for r in checker]
 
-        
+        for d in data_list[0]:
+            if d not in date_checker:
+                error_message = 'CSV File Error: Incorrect Format'
+                os.remove(f"temporary files/{data_filename}")
+                return render_template('data_input.html', column_names=column_names, stats=stats, team=team, user_teams=teams, team_members=team_members, error_message=error_message)
 
         dates = []
         for rows in data_list:
@@ -227,23 +242,8 @@ def data_input():
         conn.close()
         os.remove(f"temporary files/{data_filename}")
         
-        
 
-    
-            
-    
-    conn = sqlite3.connect("csv.db")
-    c = conn.cursor()
-    c.execute(f"SELECT * FROM '{team}'")
-    stats = c.fetchall()
-    column_names = [name[0] for name in c.description]
-    c.close()
-    column_names[0] = column_names[0].capitalize()
-    
-    
-    
-
-    return render_template('data_input.html', column_names=column_names, stats=stats, team=team, user_teams=teams, team_members=team_members)
+    return render_template('data_input.html', column_names=column_names, stats=stats, team=team, user_teams=teams, team_members=team_members, error_message=error_message)
 
 @app.route("/data-input-manual", methods=["GET", "POST"])
 def manual_input():
@@ -456,6 +456,31 @@ def signout():
     response.set_cookie('selected_team', '', max_age=0)
     response.set_cookie('teams', '', max_age=0)
     return response
+
+
+@app.route('/download_csv')
+def download():
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
+    team = request.cookies.get('selected_team')
+
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute(f"SELECT * FROM '{team}'")
+    rows = c.fetchall()
+    headers = [description[0] for description in c.description]
+    c.close()
+    
+    temp = tempfile.NamedTemporaryFile(mode='w+', newline='', delete=False, suffix=".csv")
+    writer = csv.writer(temp)
+    print(headers)
+    print(rows)
+    writer.writerow(headers)
+    writer.writerows(rows)
+    temp.seek(0)
+
+    return send_file(temp.name, as_attachment=True, download_name=f"{team}.csv", mimetype='text/csv')
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -82,7 +82,7 @@
     
     <form method="POST" enctype="multipart/form-data" action="/data-input">
         <input type="file" name="file" accept=".csv">
-        <input type="submit" value="Upload CSV">
+        <input type="submit" value="Upload CSV">{{ error_message }}
     </form>
 
     <form method="POST" id="teamForm">
@@ -93,6 +93,8 @@
             {% endfor %}
         </select>
     </form>
+    <a href='/download_csv'><button>Download CSV</button></a>
+    
   </main>
 
 <script>

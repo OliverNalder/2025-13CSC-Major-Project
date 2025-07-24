@@ -23,20 +23,25 @@
         <nav id="sidebar">
             <ul>
                 <li><a href="/">Home</a></li>
+                <li><a href="/data-input">Data Input</a></li>
                 <li class="dropdown">
-                    <a href="#" onclick="toggleDropdown(this)">Section 1</a>
+                    <a href="#" onclick="toggleDropdown(this)">Reports</a>
                     <ul class="submenu">
-                        <li><a href="/page1">Page 1</a></li>
-                        <li><a href="/page2">Page 2</a></li>
+                        <li><a href="/report">All Team</a></li>
                         <li class="dropdown">
-                          <a href="#" onclick="toggleDropdown(this)">Section 2</a>
+                          <a href="#" onclick="toggleDropdown(this)">Individuals</a>
                           <ul class="submenu">
-                              <li><a href="/page3">Page 3</a></li>
-                              <li><a href="/page4">Page 4</a></li>
+                              {% for member in team_members %}
+                                <li><a href="/report/{{member}}">{{member}}</a></li>
+                              {% endfor %}
                           </ul>
-                      </li>
+                        </li>
+                        
+                        <li><a href="/report_old">Previous Years</a></li>
+                        
                     </ul>
                 </li>
+                <li><a href="/team_manager">Team Management</a></li>
                 <li><a href="/signout">Sign Out</a></li>
             </ul>
         </nav>

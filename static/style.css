@@ -65,12 +65,12 @@ body {
     border-top: 3px solid;
     border-bottom: 3px solid;
     border-color: #3e7cb1;
-    transform: translateX(-200%);
+    transform: translateX(0);
     position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
-    z-index: 1000;
+    
 }
 
 #sidebar ul {
@@ -102,7 +102,7 @@ body {
 }
 
 #sidebar.open {
-    transform: translateX(0);
+    transform: translateX(-200%);
 }
 
 main#content {
