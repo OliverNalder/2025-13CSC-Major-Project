@@ -6,6 +6,8 @@ import csv
 import datetime
 import json
 import tempfile
+import bcrypt
+from urllib.parse import quote
 
 
 UPLOAD_FOLDER = 'temporary files'
@@ -49,6 +51,7 @@ def main():
 def signin():
     error_message = ''
     if 'save' in request.args:
+        error_message = request.args.get("error_message", '')
         username = request.args.get('username', '').strip()
         try:
             conn = sqlite3.connect("csv.db")
@@ -62,7 +65,7 @@ def signin():
             error_message = 'Couldn\'t find your account, Please try again'
         
             
-
+    print(error_message)
     return render_template('sign_in_username.html', error_message=error_message)
 
 @app.route("/signin/username=<username>", methods=["GET", "POST"])
@@ -70,19 +73,26 @@ def signin_2(username):
     
     if 'save' in request.args:
         password = request.args.get('password', '')
-        
-        try:
-            conn = sqlite3.connect("csv.db")
-            c = conn.cursor()
-            c.execute(f"SELECT username FROM acc_info WHERE username LIKE '{username}' AND password LIKE '{password}'")
-            checker = c.fetchall()
-            c.close()
-            logged_in_user = make_response(redirect("/get_team"))
-            logged_in_user.set_cookie("username", checker[0][0], max_age=3600)
-            return logged_in_user
-        except IndexError:
-            error_message = 'Incorrect Username or Password'
-            return redirect('/signin', error_message=error_message)
+        password_bytes = password.encode('utf-8') 
+    
+        conn = sqlite3.connect("csv.db")
+        c = conn.cursor()
+        c.execute("SELECT username, password FROM acc_info WHERE username = ?", (username,))
+        result = c.fetchone()
+        c.close()
+        if result:
+            db_username, db_hashed_password = result
+            
+            if bcrypt.checkpw(password_bytes, db_hashed_password):
+                
+                logged_in_user = make_response(redirect("/get_team"))
+                logged_in_user.set_cookie("username", db_username, max_age=3600)
+                return logged_in_user
+            else:
+                error_message = 'Incorrect Username or Password'
+                return redirect(f'/signin?error_message={error_message}')
+
+
     return render_template('sign_in_password.html', username=username)
         
 @app.route("/signup", methods=["GET"])
@@ -131,7 +141,7 @@ def signup_2(username, manager):
         except IndexError:
             conn = sqlite3.connect(f'csv.db')
             c = conn.cursor()
-            c.execute("INSERT INTO acc_info (username, password, manager) VALUES (?, ?, ?)", (username, password, manager))
+            c.execute("INSERT INTO acc_info (username, password, manager) VALUES (?, ?, ?)", (username, bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()), manager))
             conn.commit()
             c.close()
             logged_in_user = make_response(redirect("/get_team"))
