@@ -50,8 +50,9 @@ def main():
 @app.route("/signin", methods=["GET"])
 def signin():
     error_message = ''
+    error_message = request.args.get("error_message", '')
     if 'save' in request.args:
-        error_message = request.args.get("error_message", '')
+        
         username = request.args.get('username', '').strip()
         try:
             conn = sqlite3.connect("csv.db")
@@ -65,7 +66,6 @@ def signin():
             error_message = 'Couldn\'t find your account, Please try again'
         
             
-    print(error_message)
     return render_template('sign_in_username.html', error_message=error_message)
 
 @app.route("/signin/username=<username>", methods=["GET", "POST"])
@@ -348,7 +348,7 @@ def create_team():
         conn = sqlite3.connect("csv.db")
         c = conn.cursor()
         try:
-            c.execute("INSERT INTO _teams (team_name) VALUES (?)", (team_name,))
+            c.execute(f"INSERT INTO _teams (team_name) VALUES ({team_name})")
             c.execute(f"CREATE TABLE {team_name} (members)")
 
             for member in members:
@@ -417,7 +417,7 @@ def edit_team(team_name):
         for new in updated_members:
             if new not in current_members:
                 
-                c.execute(f"INSERT INTO '{team_name}' (members) VALUES '?'", (new,))
+                c.execute(f"INSERT INTO '{team_name}' (members) VALUES (?)", (new,))
 
         for old in current_members:
             if old not in updated_members:
@@ -484,13 +484,55 @@ def download():
     
     temp = tempfile.NamedTemporaryFile(mode='w+', newline='', delete=False, suffix=".csv")
     writer = csv.writer(temp)
-    print(headers)
-    print(rows)
     writer.writerow(headers)
     writer.writerows(rows)
     temp.seek(0)
 
     return send_file(temp.name, as_attachment=True, download_name=f"{team}.csv", mimetype='text/csv')
+
+@app.route('/new_year/<new>', methods=["GET", "POST"])
+def add_new_year(new):
+    
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
+    
+    if request.method == 'POST' and request.form.get("select"):
+        team = request.form.get("select")
+
+        resp = make_response(redirect(request.path))
+        resp.set_cookie("selected_team", team)
+        return resp
+
+    selected_team = request.cookies.get("selected_team", 0)
+    if selected_team == 0:
+        
+        user_teams = json.loads(request.cookies.get("teams", "[]"))
+        return render_template('select_team.html', user_teams=user_teams)
+    if int(new) == 0:
+        conn = sqlite3.connect("csv.db")
+        c = conn.cursor()
+        c.execute(f"SELECT * FROM '{selected_team}'")
+        checker = [check[0] for check in c.description]
+        new_date = int(checker[1][2] + checker[1][3]) - 1
+        for i in range(1-13):
+            c.execute(f"ALTER TABLE {selected_team} ADD COLUMN '{i}_{new_date}_Act' INTEGER AFTER members")
+            c.execute(f"ALTER TABLE {selected_team} ADD COLUMN '{i}_{new_date}_Tar' INTEGER AFTER members")
+            conn.commit()
+        c.close()
+    elif int(new) == 1:
+        conn = sqlite3.connect("csv.db")
+        c = conn.cursor()
+        c.execute(f"SELECT * FROM '{selected_team}'")
+        checker = [check[0] for check in c.description]
+        new_date = int(checker[1][2] + checker[1][3]) + 1
+        for i in range(1-13):
+            c.execute(f"ALTER TABLE {selected_team} ADD COLUMN '{i}_{new_date}_Tar' INTEGER")
+            c.execute(f"ALTER TABLE {selected_team} ADD COLUMN '{i}_{new_date}_Act' INTEGER")
+        c.close()
+    else:
+        redirect('/data-inpput')
+    return redirect('/data-input')
 
 if __name__ == "__main__":
     app.run(debug=True)
