@@ -96,7 +96,15 @@
     <a href='/download_csv'><button>Download CSV</button></a>
     <a href="/new_year/0"><button>Add Previous Year</button></a>
     <a href="/new_year/1"><button>Add New Year</button></a>
-    
+    <form method="POST" id="yearForm">
+        <select name="year" id="yearSelect">
+          <option selected disabled hidden>Selected Year: {{ selected_year }}</option>
+            {% for year in years %}
+                <option value="{{ year }}">{{ year }}</option>
+            {% endfor %}
+        </select>
+    </form>
+
   </main>
 
 <script>
@@ -109,6 +117,10 @@
         }
       document.getElementById("teamSelect").addEventListener("change", function () {
         document.getElementById("teamForm").submit();
+      });
+
+      document.getElementById("yearSelect").addEventListener("change", function () {
+        document.getElementById("yearForm").submit();
       });
 </script>
 </body>

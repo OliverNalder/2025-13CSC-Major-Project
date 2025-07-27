@@ -159,3 +159,7 @@ main#content {
     
 }
 
+.name {
+    white-space: nowrap;
+    width: 1%;
+}
