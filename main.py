@@ -31,6 +31,14 @@ def main():
     c.execute("SELECT username FROM acc_info")
     checker = [check[0] for check in c.fetchall()]
     c.close()
+
+    team = request.cookies.get('selected_team')
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute(f"SELECT members FROM '{team}'")
+    team_members = [t[0] for t in c.fetchall()]
+    c.close()
+    
     if username not in checker:
         return redirect('/signout')
     if request.method == 'POST' and request.form.get("select"):
@@ -52,8 +60,118 @@ def main():
 
     
         
-    return render_template('myReports.html', user_teams=user_teams)
+    return render_template('myReports.html', user_teams=user_teams, team_members=team_members)
 
+@app.route("/report")
+def team_report():
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute("SELECT username FROM acc_info")
+    checker = [check[0] for check in c.fetchall()]
+    c.close()
+    if username not in checker:
+        return redirect('/signout')
+    
+    team = request.cookies.get("selected_team", 0)
+    if team == 0:
+        
+        user_teams = json.loads(request.cookies.get("teams", "[]"))
+        return render_template('select_team.html', user_teams=user_teams)
+    
+    user_teams = request.cookies.get("teams")
+    user_teams = json.loads(user_teams)
+
+    year = request.cookies.get('selected_year')
+
+
+
+    targets = []
+    actuals = []
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    for i in range(1,13):
+        column_name = f"{i}_{year}_Tar"
+        c.execute(f'SELECT "{column_name}" FROM "{team}"')
+        column = [col[0] for col in c.fetchall()]
+        num = 0
+        for col in column:
+            if col == '':
+                col = 0
+            else:
+                col = int(col)
+            num += col
+        if num == 0:
+            num = None
+        targets.append(num)
+        column_name = f"{i}_{year}_Act"
+        c.execute(f'SELECT "{column_name}" FROM "{team}"')
+        column = [col[0] for col in c.fetchall()]
+        num = 0
+        for col in column:
+            if col == '':
+                col = 0
+            else:
+                col = int(col)
+            num += col
+        if num == 0:
+            num = None
+        actuals.append(num)
+    print(targets)
+    print(actuals)
+
+    c.close()
+
+    cumulative_targets = []
+    num = 0
+    for target in targets:
+        if target == None:
+            target = 0
+        num += target
+        cumulative_targets.append(num)
+
+    cumulative_actuals = []
+    num = 0
+    for actual in actuals:
+        if actual == None:
+            actual = 0
+        num += actual
+        cumulative_actuals.append(num)
+    print(cumulative_targets)
+    print(cumulative_actuals)
+
+    conn = sqlite3.connect('csv.db')
+    c = conn.cursor()
+    c.execute(f"SELECT members FROM '{team}'")
+    team_members = [t[0] for t in c.fetchall()]
+
+    stacked_members = {}
+
+    for member in team_members:
+        actual_list = []
+        for i in range(1, 13):
+            column_name = f"{i}_{year}_Act"
+            c.execute(f'SELECT "{column_name}" FROM "{team}" WHERE members LIKE ?', (member,))
+            result = c.fetchall()[0][0]
+            actual_list.append(result)
+        stacked_members.add(member, actual_list)
+
+    print(stacked_members)
+    
+
+    '''team_data = {
+        "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        "targets": targets,
+        "actuals": actuals,
+        "cumulative_targets": cumulative_targets,
+        "cumulative_actuals": cumulative_actuals,
+        "stacked_members": stacked_members
+    }'''
+
+    return render_template("team_report.html", data=json.dumps(team_data))
 
 @app.route("/signin", methods=["GET"])
 def signin():

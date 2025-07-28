@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Team Sales Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        canvas { margin-bottom: 40px; }
+    </style>
+</head>
+<body>
+    <h1>Team Sales Report</h1>
+
+    <canvas id="barChart" width="600" height="300"></canvas>
+    <canvas id="lineChart" width="600" height="300"></canvas>
+    <canvas id="stackedChart" width="600" height="300"></canvas>
+
+    <script>
+        const teamData = {{ data | safe }};
+        const colors = [
+            'rgba(255,99,132,0.6)', 'rgba(54,162,235,0.6)', 'rgba(255,206,86,0.6)',
+            'rgba(75,192,192,0.6)', 'rgba(153,102,255,0.6)', 'rgba(255,159,64,0.6)'
+        ];
+
+        // Bar Chart (Target vs Actual)
+        new Chart(document.getElementById("barChart"), {
+            type: 'bar',
+            data: {
+                labels: teamData.months,
+                datasets: [
+                    {
+                        label: 'Target',
+                        data: teamData.targets,
+                        backgroundColor: 'rgba(54,162,235,0.6)'
+                    },
+                    {
+                        label: 'Actual',
+                        data: teamData.actuals,
+                        backgroundColor: 'rgba(255,99,132,0.6)'
+                    }
+                ]
+            },
+            options: { responsive: true }
+        });
+
+        // Line Chart (Cumulative)
+        new Chart(document.getElementById("lineChart"), {
+            type: 'line',
+            data: {
+                labels: teamData.months,
+                datasets: [
+                    {
+                        label: 'Cumulative Target',
+                        data: teamData.cumulative_targets,
+                        borderColor: 'blue',
+                        fill: false
+                    },
+                    {
+                        label: 'Cumulative Actual',
+                        data: teamData.cumulative_actuals,
+                        borderColor: 'red',
+                        fill: false
+                    }
+                ]
+            },
+            options: { responsive: true }
+        });
+
+        // Stacked Bar Chart (Members' Actuals)
+        new Chart(document.getElementById("stackedChart"), {
+            type: 'bar',
+            data: {
+                labels: teamData.months,
+                datasets: Object.entries(teamData.stacked_members).map(([name, data], i) => ({
+                    label: name,
+                    data: data,
+                    backgroundColor: colors[i % colors.length]
+                }))
+            },
+            options: {
+                responsive: true,
+                plugins: { title: { display: true, text: 'Member Contributions (Actual)' } },
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
