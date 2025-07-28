@@ -8,6 +8,7 @@ import json
 import tempfile
 import bcrypt
 import re
+import random
 
 
 UPLOAD_FOLDER = 'temporary files'
@@ -31,14 +32,33 @@ def main():
     c.execute("SELECT username FROM acc_info")
     checker = [check[0] for check in c.fetchall()]
     c.close()
+    if username not in checker:
+        return redirect('/signout')
+    
+    if request.method == 'POST' and request.form.get("select"):
+        team = request.form.get("select")
+        current_year = str(datetime.datetime.now().year)[2:]
+        resp = make_response(redirect(request.path))
+        resp.set_cookie("selected_team", team)
+        resp.set_cookie("selected_year", current_year)
+        return resp
 
-    team = request.cookies.get('selected_team')
+    selected_team = request.cookies.get("selected_team", 0)
+    if selected_team == 0:
+        
+        user_teams = json.loads(request.cookies.get("teams", "[]"))
+        return render_template('select_team.html', user_teams=user_teams)
+    
+    
+
+    team = request.cookies.get('selected_team', 0)
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
     c.execute(f"SELECT members FROM '{team}'")
     team_members = [t[0] for t in c.fetchall()]
     c.close()
     
+
     if username not in checker:
         return redirect('/signout')
     if request.method == 'POST' and request.form.get("select"):
@@ -48,11 +68,7 @@ def main():
         resp.set_cookie("selected_team", team)
         return resp
 
-    selected_team = request.cookies.get("selected_team", 0)
-    if selected_team == 0:
-        
-        user_teams = json.loads(request.cookies.get("teams", "[]"))
-        return render_template('select_team.html', user_teams=user_teams)
+    
 
         
     user_teams = request.cookies.get("teams")
@@ -119,8 +135,7 @@ def team_report():
         if num == 0:
             num = None
         actuals.append(num)
-    print(targets)
-    print(actuals)
+    
 
     c.close()
 
@@ -139,8 +154,7 @@ def team_report():
             actual = 0
         num += actual
         cumulative_actuals.append(num)
-    print(cumulative_targets)
-    print(cumulative_actuals)
+    
 
     conn = sqlite3.connect('csv.db')
     c = conn.cursor()
@@ -155,23 +169,131 @@ def team_report():
             column_name = f"{i}_{year}_Act"
             c.execute(f'SELECT "{column_name}" FROM "{team}" WHERE members LIKE ?', (member,))
             result = c.fetchall()[0][0]
+            if result == '':
+                result = None
+            else:
+                result = int(result)
             actual_list.append(result)
-        stacked_members.add(member, actual_list)
+        stacked_members[member] = actual_list
 
-    print(stacked_members)
+    
+    current_month_cumulative_tar = 0
+    for i in range(len(cumulative_actuals)):
+        if actuals[i] == None:
+            current_month_cumulative_tar = cumulative_targets[i-1]
+            break
+    if current_month_cumulative_tar == 0:
+        current_month_cumulative_tar = cumulative_targets[-1]
+
+    
+    labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    colours = [("#{:06x}".format(random.randint(0, 0xFFFFFF))) for _ in team_members]
     
 
-    '''team_data = {
-        "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        "targets": targets,
-        "actuals": actuals,
-        "cumulative_targets": cumulative_targets,
-        "cumulative_actuals": cumulative_actuals,
-        "stacked_members": stacked_members
-    }'''
+    return render_template("team_report.html", labels=labels, target_data=targets, actual_data=actuals, cumulative_target=cumulative_targets, cumulative_actual=cumulative_actuals, stacked_data=stacked_members, team_members=team_members, colours=colours, current_month_cumulative_tar=current_month_cumulative_tar)
 
-    return render_template("team_report.html", data=json.dumps(team_data))
+@app.route("/report/<individual>")
+def individual_report(individual):
+    
+    username = request.cookies.get("username", 0)
+    if username == 0:
+        return render_template('not_signed_in.html')
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute("SELECT username FROM acc_info")
+    checker = [check[0] for check in c.fetchall()]
+    c.close()
+    if username not in checker:
+        return redirect('/signout')
+    
+    team = request.cookies.get("selected_team", 0)
+    if team == 0:
+        
+        user_teams = json.loads(request.cookies.get("teams", "[]"))
+        return render_template('select_team.html', user_teams=user_teams)
+    
+    user_teams = request.cookies.get("teams")
+    user_teams = json.loads(user_teams)
+
+    year = request.cookies.get('selected_year')
+
+
+
+    targets = []
+    cumulative_targets = []
+    actuals = []
+    cumulative_actuals = []
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    act_num = 0
+    tar_num = 0
+    for i in range(1,13):
+        column_name = f"{i}_{year}_Tar"
+        c.execute(f'SELECT "{column_name}" FROM "{team}" WHERE members LIKE ?', (individual, ))
+        column = c.fetchall()[0][0]
+       
+        if column == '':
+            column = 0
+        else:
+            tar_num += column
+        
+        targets.append(column)
+        cumulative_targets.append(tar_num)
+
+        column_name = f"{i}_{year}_Act"
+        c.execute(f'SELECT "{column_name}" FROM "{team}"')
+        column = c.fetchall()[0][0]
+
+        if column == '':
+            column = 0
+        else:
+            act_num += column
+        
+        actuals.append(column)
+        cumulative_actuals.append(act_num)
+    
+
+    c.close()
+
+    cumulative_targets = []
+    num = 0
+    for target in targets:
+        if target == None:
+            target = 0
+        num += target
+        cumulative_targets.append(num)
+
+    cumulative_actuals = []
+    num = 0
+    for actual in actuals:
+        if actual == None:
+            actual = 0
+        num += actual
+        cumulative_actuals.append(num)
+    
+    current_month_cumulative_tar = 0
+    for i in range(len(cumulative_actuals)):
+        if actuals[i] == 0:
+            current_month_cumulative_tar = cumulative_targets[i-1]
+            break
+    if current_month_cumulative_tar == 0:
+        current_month_cumulative_tar = cumulative_targets[-1]
+
+    
+    
+
+    conn = sqlite3.connect('csv.db')
+    c = conn.cursor()
+    c.execute(f"SELECT members FROM '{team}'")
+    team_members = [t[0] for t in c.fetchall()]
+
+    
+    labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    colours = [("#{:06x}".format(random.randint(0, 0xFFFFFF))) for _ in team_members]
+    
+
+    return render_template("individual_report.html", labels=labels, target_data=targets, actual_data=actuals, cumulative_target=cumulative_targets, cumulative_actual=cumulative_actuals, team_members=team_members, colours=colours, current_month_cumulative_tar=current_month_cumulative_tar)
+
 
 @app.route("/signin", methods=["GET"])
 def signin():
@@ -213,6 +335,8 @@ def signin_2(username):
                 
                 logged_in_user = make_response(redirect("/get_team"))
                 logged_in_user.set_cookie("username", db_username, max_age=3600)
+                logged_in_user.set_cookie('teams', '', max_age=0)
+                logged_in_user.set_cookie('selected_year', '', max_age=0)
                 return logged_in_user
             else:
                 error_message = 'Incorrect Username or Password'
@@ -272,6 +396,8 @@ def signup_2(username, manager):
             c.close()
             logged_in_user = make_response(redirect("/get_team"))
             logged_in_user.set_cookie("username", username, max_age=3600)
+            logged_in_user.set_cookie('teams', '', max_age=0)
+            logged_in_user.set_cookie('selected_year', '', max_age=0)
             return logged_in_user
     else:
         return render_template('sign_up_password.html', error_message=error_message, username=username, manager=manager)
@@ -307,11 +433,12 @@ def data_input():
         selected_year = request.form.get("year")
         selected_year = selected_year[2] + selected_year[3]
         resp = make_response(redirect(request.path))
-        resp.set_cookie("selected_year", selected_year)
+        resp.set_cookie("selected_year", selected_year, max_age=3600)
         return resp
 
-    team = request.cookies.get('selected_team')
+    
     teams = json.loads(request.cookies.get('teams'))
+    team = request.cookies.get('selected_team')
 
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
@@ -515,7 +642,15 @@ def team_manager():
     teams = request.cookies.get("teams")
     teams = json.loads(teams)
 
-    return render_template("team_manager.html", teams=teams)
+    team = request.cookies.get('selected_team')
+    
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute(f"SELECT members FROM '{team}'")
+    team_members = [t[0] for t in c.fetchall()]
+    c.close()
+
+    return render_template("team_manager.html", teams=teams, team_members=team_members)
 
 @app.route("/team_manager/create", methods=["GET", "POST"])
 def create_team():
@@ -529,6 +664,15 @@ def create_team():
     c.close()
     if username not in checker:
         return redirect('/signout')
+    
+    team = request.cookies.get('selected_team')
+    
+    conn = sqlite3.connect("csv.db")
+    c = conn.cursor()
+    c.execute(f"SELECT members FROM '{team}'")
+    team_members = [t[0] for t in c.fetchall()]
+    c.close()
+
     error_message = ''
     conn = sqlite3.connect("csv.db")
     c = conn.cursor()
@@ -551,8 +695,8 @@ def create_team():
 
             current_year = str(datetime.datetime.now().year)[2:]
             for i in range(1, 13):
-                c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Tar' INTEGER")
-                c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Act' INTEGER")
+                c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Tar' INTEGER DEFAULT ''")
+                c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Act' INTEGER DEFAULT ''")
 
             conn.commit()
             teams = []
@@ -574,7 +718,7 @@ def create_team():
 
         except sqlite3.OperationalError:
             error_message = 'This team name is taken'
-            return render_template("create_team.html", user_list=user_list, error_message=error_message)
+            return render_template("create_team.html", user_list=user_list, error_message=error_message, team_members=team_members)
 
 
 
@@ -675,6 +819,7 @@ def signout():
     response.set_cookie('username', '', max_age=0)
     response.set_cookie('selected_team', '', max_age=0)
     response.set_cookie('teams', '', max_age=0)
+    response.set_cookie('selected_year', '', max_age=0)
     return response
 
 
@@ -754,8 +899,8 @@ def add_new_year(new):
         return redirect('/data-input')
 
     for i in range(1, 13):
-        c.execute(f"ALTER TABLE '{selected_team}' ADD COLUMN '{i}_{new_year}_Tar' INTEGER")
-        c.execute(f"ALTER TABLE '{selected_team}' ADD COLUMN '{i}_{new_year}_Act' INTEGER")
+        c.execute(f"ALTER TABLE '{selected_team}' ADD COLUMN '{i}_{new_year}_Tar' INTEGER DEFAULT ''")
+        c.execute(f"ALTER TABLE '{selected_team}' ADD COLUMN '{i}_{new_year}_Act' INTEGER DEFAULT ''")
         conn.commit()
     
     conn.commit()

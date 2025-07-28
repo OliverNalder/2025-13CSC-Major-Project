@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Log in</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <div class="sign_in_box">
+    
+    <div class="sign_up_box">
+        <a href="https://wealthpoint.co.nz/"><img src="/static/__LogoCMYK NOBLYINE (1).png" alt="Logo" class="logo" /></a>
         <h1>Sign In</h1>
         <form action="/signin" method="GET">
             <h3>Username</h3>
             
-            <input type="text" size="100" maxlength="100"name="username" required>
+            <input type="text" maxlength="100"name="username" required>
             
             <input type="submit" name="save" value="Next">
         </form>
+        <p>Don't have an account? <a href="/signup">Create one here</a></p>
         <p>{{ error_message }}</p>
 
     </div>
