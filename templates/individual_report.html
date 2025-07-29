@@ -52,9 +52,7 @@
                 <div class="graph-container" id="graph2">
                     <canvas id="lineChart"></canvas>
                 </div>
-                <div class="graph-container" id="graph3">
-                    <canvas id="stackedChart"></canvas>
-                </div>
+                
                 <div class="info-container" id="infoBox">
                     <h3>YTD Progress</h3>
                     <p>Total Actual: ${{ cumulative_actual[-1] }}</p>
@@ -129,48 +127,7 @@
             options: { responsive: true }
         });
 
-        // Stacked Bar Chart
-        const stackedChart = new Chart(document.getElementById('stackedChart'), {
-            type: 'bar',
-            data: {
-                labels: {{ labels | tojson }},
-                datasets: [
-                    {% for member, values in stacked_data.items() %}
-                    {
-                        label: '{{ member }}',
-                        data: {{ values | tojson }},
-                        backgroundColor: '{{ colours[loop.index0] }}'
-                    },
-                    {% endfor %}
-                ]
-            },
-            options: {
-            plugins: {
-                legend: {
-                    position: 'right',
-                    align: 'center',
-                    labels: {
-                        boxWidth: 20,
-                        padding: 10
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'All Team - Actual Sales (by month)'
-                }
-            },
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    stacked: true
-                },
-                y: {
-                    stacked: true
-                }
-            }
-        }
-        });
+        
         
     </script>
 </body>
