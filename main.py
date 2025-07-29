@@ -9,6 +9,7 @@ import tempfile
 import bcrypt
 import re
 import random
+import random
 
 
 UPLOAD_FOLDER = 'temporary files'
@@ -59,6 +60,8 @@ def main():
     c.close()
     
 
+    
+
     if username not in checker:
         return redirect('/signout')
     if request.method == 'POST' and request.form.get("select"):
@@ -68,6 +71,7 @@ def main():
         resp.set_cookie("selected_team", team)
         return resp
 
+    
     
 
         
@@ -136,6 +140,7 @@ def team_report():
             num = None
         actuals.append(num)
     
+    
 
     c.close()
 
@@ -155,6 +160,7 @@ def team_report():
         num += actual
         cumulative_actuals.append(num)
     
+    
 
     conn = sqlite3.connect('csv.db')
     c = conn.cursor()
@@ -169,6 +175,10 @@ def team_report():
             column_name = f"{i}_{year}_Act"
             c.execute(f'SELECT "{column_name}" FROM "{team}" WHERE members LIKE ?', (member,))
             result = c.fetchall()[0][0]
+            if result == '':
+                result = None
+            else:
+                result = int(result)
             if result == '':
                 result = None
             else:
@@ -339,6 +349,8 @@ def signin_2(username):
                 logged_in_user.set_cookie("username", db_username, max_age=3600)
                 logged_in_user.set_cookie('teams', '', max_age=0)
                 logged_in_user.set_cookie('selected_year', '', max_age=0)
+                logged_in_user.set_cookie('teams', '', max_age=0)
+                logged_in_user.set_cookie('selected_year', '', max_age=0)
                 return logged_in_user
             else:
                 error_message = 'Incorrect Username or Password'
@@ -400,6 +412,8 @@ def signup_2(username, manager):
             logged_in_user.set_cookie("username", username, max_age=3600)
             logged_in_user.set_cookie('teams', '', max_age=0)
             logged_in_user.set_cookie('selected_year', '', max_age=0)
+            logged_in_user.set_cookie('teams', '', max_age=0)
+            logged_in_user.set_cookie('selected_year', '', max_age=0)
             return logged_in_user
     else:
         return render_template('sign_up_password.html', error_message=error_message, username=username, manager=manager)
@@ -436,10 +450,13 @@ def data_input():
         selected_year = selected_year[2] + selected_year[3]
         resp = make_response(redirect(request.path))
         resp.set_cookie("selected_year", selected_year, max_age=3600)
+        resp.set_cookie("selected_year", selected_year, max_age=3600)
         return resp
 
     
+    
     teams = json.loads(request.cookies.get('teams'))
+    team = request.cookies.get('selected_team')
     team = request.cookies.get('selected_team')
 
     conn = sqlite3.connect("csv.db")
@@ -703,6 +720,8 @@ def create_team():
             for i in range(1, 13):
                 c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Tar' INTEGER DEFAULT ''")
                 c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Act' INTEGER DEFAULT ''")
+                c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Tar' INTEGER DEFAULT ''")
+                c.execute(f"ALTER TABLE {team_name} ADD COLUMN '{i}_{current_year}_Act' INTEGER DEFAULT ''")
 
             conn.commit()
             teams = []
@@ -826,6 +845,7 @@ def signout():
     response.set_cookie('selected_team', '', max_age=0)
     response.set_cookie('teams', '', max_age=0)
     response.set_cookie('selected_year', '', max_age=0)
+    response.set_cookie('selected_year', '', max_age=0)
     return response
 
 
@@ -905,6 +925,8 @@ def add_new_year(new):
         return redirect('/data-input')
 
     for i in range(1, 13):
+        c.execute(f"ALTER TABLE '{selected_team}' ADD COLUMN '{i}_{new_year}_Tar' INTEGER DEFAULT ''")
+        c.execute(f"ALTER TABLE '{selected_team}' ADD COLUMN '{i}_{new_year}_Act' INTEGER DEFAULT ''")
         c.execute(f"ALTER TABLE '{selected_team}' ADD COLUMN '{i}_{new_year}_Tar' INTEGER DEFAULT ''")
         c.execute(f"ALTER TABLE '{selected_team}' ADD COLUMN '{i}_{new_year}_Act' INTEGER DEFAULT ''")
         conn.commit()
