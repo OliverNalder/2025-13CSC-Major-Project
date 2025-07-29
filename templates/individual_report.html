@@ -40,6 +40,140 @@
                     </ul>
                 </li>
                 <li><a href="/team_manager">Team Management</a></li>
+                <li><a href="/signout">Sign Out&nbsp;&nbsp; -&nbsp;&nbsp; {{username}}</a></li>
+            </ul>
+        </nav>
+
+        <main id="content">
+            <div class="grid-layout">
+                <div class="graph-container" id="graph1">
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="graph-container" id="graph2">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                
+                <div class="info-container" id="infoBox">
+                    <h3>YTD Progress</h3>
+                    <p>Total Actual: ${{ cumulative_actual[-1] }}</p>
+                    <p>Total Target: ${{ current_month_cumulative_tar }}</p>
+                    {% if cumulative_actual[-1] >= current_month_cumulative_tar %}
+                        <p>Status: <span style="color:green;font-weight:bold;">Above Target</span></p>
+                    {% else %}
+                        <p>Status: <span style="color:rgb(200, 0, 0);font-weight:bold;">Below Target</span></p>
+                    {% endif %}
+                    {% if cumulative_actual[-1]/current_month_cumulative_tar*100 > 100 %}
+                        <p><span style="color:green;font-weight:bold;">{{ '%.2f' | format(cumulative_actual[-1]/current_month_cumulative_tar*100) }}%</span></p>
+                    {% else %}
+                        <p><span style="color:rgb(200, 0, 0);font-weight:bold;">{{ '%.2f' | format(cumulative_actual[-1]/current_month_cumulative_tar*100) }}%</span></p>
+                    {% endif %}
+                </div>
+            </div>
+
+            
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById("sidebar").classList.toggle("open");
+        }
+
+        function toggleDropdown(el) {
+            el.nextElementSibling.classList.toggle("open");
+        }
+
+        // Bar Chart (Target vs Actual)
+        const barChart = new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: {{ labels | tojson }},
+                datasets: [
+                    {
+                        label: 'Target',
+                        data: {{ target_data | tojson }},
+                        backgroundColour: 'rgba(54, 162, 235, 0.6)'
+                    },
+                    {
+                        label: 'Actual',
+                        data: {{ actual_data | tojson }},
+                        backgroundColour: 'rgba(255, 99, 132, 0.6)'
+                    }
+                ]
+            },
+            options: { responsive: true }
+        });
+
+        // Line Chart (Cumulative)
+        const lineChart = new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: {{ labels | tojson }},
+                datasets: [
+                    {
+                        label: 'Cumulative Target',
+                        data: {{ cumulative_target | tojson }},
+                        borderColour: 'rgba(54, 162, 235, 1)',
+                        fill: false
+                    },
+                    {
+                        label: 'Cumulative Actual',
+                        data: {{ cumulative_actual | tojson }},
+                        borderColour: 'rgba(255, 99, 132, 1)',
+                        fill: false
+                    }
+                ]
+            },
+            options: { responsive: true }
+        });
+
+        
+        
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Input</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="nav_menu"></div>
+
+    <header>
+        <div class="top-bar">
+            <div class="hamburger" onclick="toggleSidebar()">
+                &#9776;
+            </div>
+            <a href="https://wealthpoint.co.nz/"><img src="/static/__LogoCMYK NOBLYINE (1).png" alt="Logo" class="logo" /></a>
+        </div>
+    </header>
+
+    <div class="container">
+        <nav id="sidebar">
+            <ul>
+                <li><a href="/">Home</a></li>
+                <li><a href="/data-input">Data Input</a></li>
+                <li class="dropdown">
+                    <a href="#" onclick="toggleDropdown(this)">Reports</a>
+                    <ul class="submenu">
+                        <li><a href="/report">All Team</a></li>
+                        <li class="dropdown">
+                            <a href="#" onclick="toggleDropdown(this)">Individuals</a>
+                            <ul class="submenu">
+                                {% for member in team_members %}
+                                <li><a href="/report/{{member}}">{{member}}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                        <li><a href="/report_old">Previous Years</a></li>
+                    </ul>
+                </li>
+                <li><a href="/team_manager">Team Management</a></li>
                 <li><a href="/signout">Sign Out</a></li>
             </ul>
         </nav>
