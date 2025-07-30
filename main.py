@@ -254,7 +254,7 @@ def individual_report(individual):
         c.execute(f'SELECT "{column_name}" FROM "{team}" WHERE members LIKE ?', (individual, ))
         column = c.fetchall()[0][0]
 
-        print(column)
+        
         if column == '':
             column = 0
         else:
@@ -290,8 +290,7 @@ def individual_report(individual):
     if current_month_cumulative_tar == 0:
         current_month_cumulative_tar = cumulative_targets[-1]
 
-    print(cumulative_actuals)
-    print(actuals)
+    
     
 
     conn = sqlite3.connect('csv.db')
