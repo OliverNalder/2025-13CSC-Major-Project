@@ -46,7 +46,7 @@
             </ul>
         </nav>
         
-  <main id="content">
+  <main id="content" class="input_page">
             
         
     
@@ -79,7 +79,9 @@
       </div>
       <button type="submit">Save Data</button>
     </form>
-    
+    <a href='/download_csv'><button>Download CSV</button></a>
+    <a href="/new_year/0"><button>Add Previous Year</button></a>
+    <a href="/new_year/1"><button>Add New Year</button></a>
     <form method="POST" enctype="multipart/form-data" action="/data-input">
         <input type="file" name="file" accept=".csv">
         <input type="submit" value="Upload CSV">{{ error_message }}
@@ -93,9 +95,7 @@
             {% endfor %}
         </select>
     </form>
-    <a href='/download_csv'><button>Download CSV</button></a>
-    <a href="/new_year/0"><button>Add Previous Year</button></a>
-    <a href="/new_year/1"><button>Add New Year</button></a>
+    
     <form method="POST" id="yearForm">
         <select name="year" id="yearSelect">
           <option selected disabled hidden>Selected Year: {{ selected_year }}</option>

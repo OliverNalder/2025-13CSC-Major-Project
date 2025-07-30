@@ -268,3 +268,9 @@ canvas {
 .sign_up_box .manager {
     width: auto
 }
+
+.input_page button {
+    width: 20%;
+    height: 40px;
+    
+}
