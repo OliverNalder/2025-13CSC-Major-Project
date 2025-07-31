@@ -36,7 +36,7 @@
                                 {% endfor %}
                             </ul>
                         </li>
-                        <li><a href="/report_old">Previous Years</a></li>
+                        
                     </ul>
                 </li>
                 <li><a href="/team_manager">Team Management</a></li>
@@ -101,7 +101,15 @@
                     }
                 ]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Target vs Actual - {{ individual }}'
+                    }
+                }
+            }
         });
 
         // Line Chart (Cumulative)
@@ -124,7 +132,15 @@
                     }
                 ]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Cumulative Progress - {{ individual }}'
+                    }
+                }
+            }
         });
 
         

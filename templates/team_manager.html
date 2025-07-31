@@ -43,7 +43,7 @@
                           </ul>
                         </li>
                         
-                        <li><a href="/report_old">Previous Years</a></li>
+                        
                         
                     </ul>
                 </li>
@@ -53,21 +53,36 @@
         </nav>
 
     
-    <main id="content">
-        <h1>Active teams:</h1>
-        <table border="1">
-        
+    <main id="content" class="team-manager-page">
+    <h1 style="text-align:center; margin-top: 2%;">Active Teams</h1>
+    <div class="team-table-container" style="display:flex; justify-content:center;">
+        <table class="team-table" style="border-collapse:collapse; width:60%; background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+            <thead>
+                <tr style="background:#d7e9f1ff;">
+                    <th style="padding:12px 0; font-size:20px;">Team Name</th>
+                    <th style="padding:12px 0; font-size:20px;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
                 {% for team in teams: %}
-        
                 <tr>
-                    <td>{{team}}</td>
-                    <td><a href='/team_manager/edit/{{team}}' border='1'><button>Manage</button></a></td>
+                    <td style="padding:12px 0; text-align:center; font-size:18px;">{{team}}</td>
+                    <td style="padding:12px 0; text-align:center;">
+                        <a href='/team_manager/edit/{{team}}'>
+                            <button class="upload_button" style="width:auto; min-width:120px;">Manage</button>
+                        </a>
+                    </td>
                 </tr>
                 {% endfor %}
-            
+            </tbody>
         </table>
-        <a href='/team_manager/create' border='1'><button>Create Team</button>
-    </main>
+    </div>
+    <div style="text-align:center; margin-top:2%;">
+        <a href='/team_manager/create'>
+            <button class="upload_button" style="width:auto; min-width:160px;">Create Team</button>
+        </a>
+    </div>
+</main>
 
     <script>
         function toggleSidebar() {

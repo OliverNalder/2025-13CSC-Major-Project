@@ -37,7 +37,7 @@
                           </ul>
                         </li>
                         
-                        <li><a href="/report_old">Previous Years</a></li>
+                        
                         
                     </ul>
                 </li>
@@ -97,22 +97,27 @@
     <form method="POST" id="yearForm" class="select-form">
         
       </form>
-  <div class="secondary-options">
-    <select name="select" id="teamSelect" form="teamForm">
+  <div class="secondary-options" style="gap: 12px; align-items: center;">
+    <form method="POST" enctype="multipart/form-data" action="/data-input" id="CSV" style="gap: 12px; align-items: center;">
+        <select name="select" id="teamSelect" form="teamForm">
             <option selected disabled hidden>Team: {{ team }}</option>
             {% for t in user_teams %}
                 <option value="{{ t }}">{{ t }}</option>
             {% endfor %}
         </select>
-    <select name="year" id="yearSelect" form="yearForm">
-          <option selected disabled hidden>Selected Year: {{ selected_year }}</option>
+        <select name="year" id="yearSelect" form="yearForm">
+            <option selected disabled hidden>Selected Year: {{ selected_year }}</option>
             {% for year in years %}
                 <option value="{{ year }}">{{ year }}</option>
             {% endfor %}
         </select>
-    <input type="file" accept=".csv" form="CSV" class="file_upload">
-    <input type="submit" value="Upload CSV" form="CSV" class="upload_button">
-  </div>
+        <div class="file-upload-wrapper" onclick="document.getElementById('real-file').click();">
+            <button type="button" class="file-upload-btn">Choose File</button>
+            <input type="file" class="file_upload" accept=".csv" name="file" id="real-file" style="display:none;">
+        </div>
+        <input type="submit" value="Upload CSV" class="upload_button">
+    </form>
+</div>
     <p class="error-message">{{ error_message }}</p>
   </main>
 
@@ -130,6 +135,10 @@
 
       document.getElementById("yearSelect").addEventListener("change", function () {
         document.getElementById("yearForm").submit();
+      });
+      document.getElementById('file-upload-input').addEventListener('change', function() {
+        var fileName = this.files[0].name;
+        document.getElementById('file-upload-text').textContent = fileName;
       });
 </script>
 </body>

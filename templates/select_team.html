@@ -37,7 +37,7 @@
                           </ul>
                         </li>
                         
-                        <li><a href="/report_old">Previous Years</a></li>
+                        
                         
                     </ul>
                 </li>
@@ -47,14 +47,17 @@
         </nav>
         
   <main id="content">
-    <form method="POST" id="teamForm">
-        <select name="select" id="teamSelect">
-            <option selected disabled hidden>Select Team</option>
-            {% for team in user_teams %}
-                <option value="{{ team }}">{{ team }}</option>
-            {% endfor %}
-        </select>
-    </form>
+    <div class="select-team">
+        <form method="POST" id="teamForm">
+            <select name="select" id="teamSelect">
+                <option selected disabled hidden>Select Team</option>
+                {% for team in user_teams %}
+                    <option value="{{ team }}">{{ team }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <p>Not in a team? <a href="/team_manager/create">Head to this site to create one</a></p>
+    </div>
   </main>
 
 <script>

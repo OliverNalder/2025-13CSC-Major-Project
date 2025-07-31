@@ -95,7 +95,7 @@
                           </ul>
                         </li>
                         
-                        <li><a href="/report_old">Previous Years</a></li>
+                        
                         
                     </ul>
                 </li>
@@ -104,30 +104,35 @@
             </ul>
         </nav>
     
-    <main id="content">
-      <form method="POST" action="/team_manager/create">
-          <input type="text" name="team_name" placeholder="Team Name" required>
-          <table border="1">
-            <tr><th>Members</th></tr>
-            <tbody></tbody>
-            <tr>
-              <td>
-                <div class="dropdown">
-                  <button onclick="addToggleDropdown()" class="dropbtn" type="button">Add Member</button>
-                  <div id="myDropdown" class="dropdown-content">
-                    <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()">
-                    {% for user in user_list %}
-                      <button type="button" onclick="addMember(event)" id="{{ user[0] }}">{{ user[0] }}</button>
-                    {% endfor %}
-                  </div>
-                </div>
-              </td>
-            </tr>
-          </table>
-          <button type="submit">Create Team</button>
-        </form>
-        <p>{{ error_message }}</p>
-    </main>
+    <main id="content" style="display:flex; flex-direction:column; align-items:center; min-height:80vh;">
+  <h1 style="margin-top:2%; margin-bottom:1%; text-align:center;">Create a New Team</h1>
+  <form method="POST" action="/team_manager/create" style="background:#fff; padding:32px 40px; border-radius:16px; box-shadow:0 2px 12px rgba(0,0,0,0.08); min-width:340px; max-width:480px; width:100%;">
+      <input type="text" name="team_name" placeholder="Team Name" required style="width:100%; padding:12px; font-size:18px; border-radius:8px; border:1px solid #3e7cb1; margin-bottom:18px;">
+      <table style="width:100%; border-collapse:collapse; background:#f8fafc; border-radius:8px; margin-bottom:18px;">
+        <thead>
+          <tr>
+            <th style="padding:10px 0; font-size:18px; background:#d7e9f1ff; border-radius:8px 8px 0 0;">Members</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+        <tr>
+          <td style="padding:10px 0; text-align:center;">
+            <div class="dropdown" style="display:inline-block;">
+              <button onclick="addToggleDropdown()" class="dropbtn upload_button" type="button" style="width:auto; min-width:120px;">Add Member</button>
+              <div id="myDropdown" class="dropdown-content" style="box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+                <input type="text" placeholder="Search.." id="myInput" onkeyup="filterFunction()" style="width:90%; margin:8px 5%; border-radius:6px;">
+                {% for user in user_list %}
+                  <button type="button" onclick="addMember(event)" id="{{ user[0] }}">{{ user[0] }}</button>
+                {% endfor %}
+              </div>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <button type="submit" class="upload_button" style="width:100%; font-size:18px; margin-top:10px;">Create Team</button>
+      <p style="color:red; text-align:center; margin-top:12px;">{{ error_message }}</p>
+  </form>
+</main>
 
 
 

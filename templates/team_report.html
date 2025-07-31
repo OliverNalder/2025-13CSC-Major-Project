@@ -38,7 +38,7 @@
                                 {% endfor %}
                             </ul>
                         </li>
-                        <li><a href="/report_old">Previous Years</a></li>
+                        
                     </ul>
                 </li>
                 <li><a href="/team_manager">Team Management</a></li>
@@ -61,15 +61,21 @@
                     <h3>YTD Progress</h3>
                     <p>Total Actual: ${{ cumulative_actual[-1] }}</p>
                     <p>Total Target: ${{ current_month_cumulative_tar }}</p>
-                    {% if cumulative_actual[-1] >= current_month_cumulative_tar %}
-                        <p>Status: <span style="color:green;font-weight:bold;">Above Target</span></p>
+                    {% if current_month_cumulative_tar == 0 %}
+                        <p>Status: <span style="color:rgb(200, 0, 0);font-weight:bold;">N/A</span></p>
+                        <p><span style="color:rgb(200, 0, 0);font-weight:bold;">0%</span></p>
                     {% else %}
-                        <p>Status: <span style="color:rgb(200, 0, 0);font-weight:bold;">Below Target</span></p>
-                    {% endif %}
-                    {% if cumulative_actual[-1]/current_month_cumulative_tar*100 > 100 %}
-                        <p><span style="color:green;font-weight:bold;">{{ '%.2f' | format(cumulative_actual[-1]/current_month_cumulative_tar*100) }}%</span></p>
-                    {% else %}
-                        <p><span style="color:rgb(200, 0, 0);font-weight:bold;">{{ '%.2f' | format(cumulative_actual[-1]/current_month_cumulative_tar*100) }}%</span></p>
+                        {% if cumulative_actual[-1] >= current_month_cumulative_tar %}
+                            <p>Status: <span style="color:green;font-weight:bold;">Above Target</span></p>
+                        {% else %}
+                            <p>Status: <span style="color:rgb(200, 0, 0);font-weight:bold;">Below Target</span></p>
+                        {% endif %}
+                    
+                        {% if cumulative_actual[-1]/current_month_cumulative_tar*100 > 100 %}
+                            <p><span style="color:green;font-weight:bold;">{{ '%.2f' | format(cumulative_actual[-1]/current_month_cumulative_tar*100) }}%</span></p>
+                        {% else %}
+                            <p><span style="color:rgb(200, 0, 0);font-weight:bold;">{{ '%.2f' | format(cumulative_actual[-1]/current_month_cumulative_tar*100) }}%</span></p>
+                        {% endif %}
                     {% endif %}
                 </div>
             </div>
@@ -105,7 +111,15 @@
                     }
                 ]
             },
-            options: { responsive: true }
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Target vs Actual'
+                    }
+                }
+            }
         });
 
         // Line Chart (Cumulative)
@@ -128,7 +142,15 @@
                     }
                 ]
             },
-            options: { responsive: true }
+            options: { 
+                responsive: true, 
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Cumulative Progress'
+                    }
+                }
+            }
         });
 
         // Stacked Bar Chart

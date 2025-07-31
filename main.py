@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, session, make_response, url_for, send_file
+from flask import Flask, render_template, request, redirect, session, make_response, send_file
 from werkzeug.utils import secure_filename
 import sqlite3
 import os
@@ -80,7 +80,7 @@ def main():
 
     
         
-    return render_template('myReports.html', user_teams=user_teams, team_members=team_members, username=username)
+    return redirect('/report')
 
 @app.route("/report")
 def team_report():
@@ -299,7 +299,7 @@ def individual_report(individual):
     colours = [("#{:06x}".format(random.randint(0, 0xFFFFFF))) for _ in team_members]
     
 
-    return render_template("individual_report.html", labels=labels, target_data=targets, actual_data=actuals, cumulative_target=cumulative_targets, cumulative_actual=cumulative_actuals, team_members=team_members, colours=colours, current_month_cumulative_tar=current_month_cumulative_tar, username=username)
+    return render_template("individual_report.html", labels=labels, target_data=targets, actual_data=actuals, cumulative_target=cumulative_targets, cumulative_actual=cumulative_actuals, team_members=team_members, colours=colours, current_month_cumulative_tar=current_month_cumulative_tar, username=username, individual=individual)
 
 
 @app.route("/signin", methods=["GET"])
@@ -500,7 +500,9 @@ def data_input():
     if request.method == 'POST':
 
         f = request.files.get('file')
-
+        if f == None:
+            error_message = 'No file selected'
+            return render_template('data_input.html', column_names=column_names, stats=stats, team=team, user_teams=teams, team_members=team_members, error_message=error_message, years=years, selected_year=(2000+year), username=username)
         data_filename = secure_filename(f.filename)
         f.save(os.path.join(app.config['UPLOAD_FOLDER'], data_filename))
         session['uploaded_data_file_path'] = os.path.join(app.config['UPLOAD_FOLDER'], data_filename)
@@ -918,6 +920,15 @@ def add_new_year(new):
     conn.commit()
     return redirect('/data-input')
 
+
+@app.errorhandler(403)
+def mistake403(code):
+    return 'There is a mistake in your url!'
+
+
+@app.errorhandler(404)
+def mistake404(code):
+    return 'Sorry, this page does not exist!'
 
 if __name__ == "__main__":
     app.run(debug=True)
