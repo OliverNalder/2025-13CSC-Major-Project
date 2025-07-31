@@ -5,23 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Input</title>
     <link rel="stylesheet" href="/static/style.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Input</title>
-    <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="nav_menu"></div>
 
-    <header>
-        <div class="top-bar">
-            <div class="hamburger" onclick="toggleSidebar()">
-                &#9776;
-            </div>
-            <a href="https://wealthpoint.co.nz/"><img src="/static/__LogoCMYK NOBLYINE (1).png" alt="Logo" class="logo" /></a>
-        </div>
-    </header>
-    <div class="nav_menu"></div>
+    
 
     <header>
         <div class="top-bar">
@@ -97,33 +86,20 @@
         function toggleDropdown(el) {
             el.nextElementSibling.classList.toggle("open");
         }
-        function toggleSidebar() {
-            document.getElementById("sidebar").classList.toggle("open");
-        }
-
-        function toggleDropdown(el) {
-            el.nextElementSibling.classList.toggle("open");
-        }
 
         // Bar Chart (Target vs Actual)
         const barChart = new Chart(document.getElementById('barChart'), {
-        const barChart = new Chart(document.getElementById('barChart'), {
             type: 'bar',
             data: {
-                labels: {{ labels | tojson }},
                 labels: {{ labels | tojson }},
                 datasets: [
                     {
                         label: 'Target',
                         data: {{ target_data | tojson }},
                         backgroundColour: 'rgba(54, 162, 235, 0.6)'
-                        data: {{ target_data | tojson }},
-                        backgroundColour: 'rgba(54, 162, 235, 0.6)'
                     },
                     {
                         label: 'Actual',
-                        data: {{ actual_data | tojson }},
-                        backgroundColour: 'rgba(255, 99, 132, 0.6)'
                         data: {{ actual_data | tojson }},
                         backgroundColour: 'rgba(255, 99, 132, 0.6)'
                     }
@@ -134,24 +110,18 @@
 
         // Line Chart (Cumulative)
         const lineChart = new Chart(document.getElementById('lineChart'), {
-        const lineChart = new Chart(document.getElementById('lineChart'), {
             type: 'line',
             data: {
-                labels: {{ labels | tojson }},
                 labels: {{ labels | tojson }},
                 datasets: [
                     {
                         label: 'Cumulative Target',
                         data: {{ cumulative_target | tojson }},
                         borderColour: 'rgba(54, 162, 235, 1)',
-                        data: {{ cumulative_target | tojson }},
-                        borderColour: 'rgba(54, 162, 235, 1)',
                         fill: false
                     },
                     {
                         label: 'Cumulative Actual',
-                        data: {{ cumulative_actual | tojson }},
-                        borderColour: 'rgba(255, 99, 132, 1)',
                         data: {{ cumulative_actual | tojson }},
                         borderColour: 'rgba(255, 99, 132, 1)',
                         fill: false
@@ -163,20 +133,8 @@
 
         // Stacked Bar Chart
         const stackedChart = new Chart(document.getElementById('stackedChart'), {
-        // Stacked Bar Chart
-        const stackedChart = new Chart(document.getElementById('stackedChart'), {
             type: 'bar',
             data: {
-                labels: {{ labels | tojson }},
-                datasets: [
-                    {% for member, values in stacked_data.items() %}
-                    {
-                        label: '{{ member }}',
-                        data: {{ values | tojson }},
-                        backgroundColor: '{{ colours[loop.index0] }}'
-                    },
-                    {% endfor %}
-                ]
                 labels: {{ labels | tojson }},
                 datasets: [
                     {% for member, values in stacked_data.items() %}
@@ -214,33 +172,7 @@
                 }
             }
         }
-            plugins: {
-                legend: {
-                    position: 'right',
-                    align: 'center',
-                    labels: {
-                        boxWidth: 20,
-                        padding: 10
-                    }
-                },
-                title: {
-                    display: true,
-                    text: 'All Team - Actual Sales (by month)'
-                }
-            },
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    stacked: true
-                },
-                y: {
-                    stacked: true
-                }
-            }
-        }
         });
-        
         
     </script>
 </body>

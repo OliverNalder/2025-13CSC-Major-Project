@@ -52,7 +52,7 @@
     
 
 
-    <form method="POST" action="/data-input-manual">
+    <form method="POST" action="/data-input-manual" id="data-input-form">
       <div class="input_table">
       <table border="1" cellspacing="0">
         <thead>
@@ -77,34 +77,43 @@
         </tbody>
       </table>
       </div>
-      <button type="submit">Save Data</button>
+      
+    </form>
+    <div class="button-container">
+        <button type="submit" form="data-input-form">Save Data</button>
+        <a href='/download_csv'><button>Download CSV</button></a>
+        <a href="/new_year/0"><button>Add Previous Year</button></a>
+        <a href="/new_year/1"><button>Add New Year</button></a>
+    </div>
+    
+    <form method="POST" enctype="multipart/form-data" action="/data-input" class="csv-upload" id="CSV">
+        
     </form>
     
-    <form method="POST" enctype="multipart/form-data" action="/data-input">
-        <input type="file" name="file" accept=".csv">
-        <input type="submit" value="Upload CSV">{{ error_message }}
+    <form method="POST" id="teamForm" class="select-form">
+        
     </form>
-
-    <form method="POST" id="teamForm">
-        <select name="select" id="teamSelect">
-            <option selected disabled hidden>Selected Team: {{ team }}</option>
+    
+    <form method="POST" id="yearForm" class="select-form">
+        
+      </form>
+  <div class="secondary-options">
+    <select name="select" id="teamSelect" form="teamForm">
+            <option selected disabled hidden>Team: {{ team }}</option>
             {% for t in user_teams %}
                 <option value="{{ t }}">{{ t }}</option>
             {% endfor %}
         </select>
-    </form>
-    <a href='/download_csv'><button>Download CSV</button></a>
-    <a href="/new_year/0"><button>Add Previous Year</button></a>
-    <a href="/new_year/1"><button>Add New Year</button></a>
-    <form method="POST" id="yearForm">
-        <select name="year" id="yearSelect">
+    <select name="year" id="yearSelect" form="yearForm">
           <option selected disabled hidden>Selected Year: {{ selected_year }}</option>
             {% for year in years %}
                 <option value="{{ year }}">{{ year }}</option>
             {% endfor %}
         </select>
-    </form>
-
+    <input type="file" accept=".csv" form="CSV" class="file_upload">
+    <input type="submit" value="Upload CSV" form="CSV" class="upload_button">
+  </div>
+    <p class="error-message">{{ error_message }}</p>
   </main>
 
 <script>
